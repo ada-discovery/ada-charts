@@ -19,6 +19,7 @@ export default class extends Chart {
       .attr('width', width + margin.left + margin.right)
       .attr('height', height + margin.top + margin.bottom)
       .style('transform', `translate(${margin.left}px, ${margin.top}px)`)
+      .style('position', 'absolute')
       .node();
     this.svg = d3.select(container).append('svg')
       .attr('width', width + margin.left + margin.right)
@@ -36,7 +37,6 @@ export default class extends Chart {
          }) {
     this.databind(data, rowNames, colNames);
     this.draw(this.canvas);
-
   }
 
   databind(data, rowNames, colNames) {
@@ -56,12 +56,36 @@ export default class extends Chart {
 
     rect.exit()
       .remove();
+
+    const rowLabels = this.svg.selectAll('text.row-label')
+      .data(rowNames);
+
+    rowLabels.enter()
+      .append('text')
+      .attr('class', 'row-label')
+      .attr('text-anchor', 'end')
+      .attr('x', 0)
+      .attr('y', (d, i) => (i + 0.5) * rectSize)
+      .style('font-size', '10px') // FIXME: needs to be dynamic
+      .text(d => d);
+
+    const colLabels = this.svg.selectAll('text.col-label')
+      .data(colNames);
+
+    colLabels.enter()
+      .append('text')
+      .attr('class', 'col-label')
+      .attr('text-anchor', 'end')
+      .style('transform', (d, i) => `translate(${(i + 0.5) * rectSize}px, 0px)rotate(45deg)`)
+      .style('font-size', '10px') // FIXME: needs to be dynamic
+      .text(d => d);
   }
 
   draw(canvas) {
     const context = canvas.getContext('2d');
     context.clearRect(0, 0, width, height);
     this.memory.selectAll('rect') // FIXME: save this selection to improve performance
+    // eslint-disable-next-line func-names
       .each(function () {
         const node = d3.select(this);
         context.fillStyle = node.attr('fillStyle');
