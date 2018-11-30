@@ -32,15 +32,22 @@ export default class extends Chart {
     return 'heatmap';
   }
 
-  update({
-           data, title, rowNames, colNames,
-         }) {
-    this.databind(data, rowNames, colNames);
+  update({ data, valueRange, title, rowNames, colNames, sequential }) {
+    this.databind(data, valueRange, rowNames, colNames, sequential);
     this.draw(this.canvas);
   }
 
-  databind(data, rowNames, colNames) {
-    const rectSize = Math.floor(width / rowNames.length);
+  databind(data, valueRange, rowNames, colNames, sequential) {
+    const rectSize = Math.floor(height / rowNames.length); // FIXME: this is just a placeholder
+
+    let colorScale = null;
+    if (sequential) {
+      colorScale = d3.scaleSequential(d3.interpolateRdBu)
+        .domain(valueRange || d3.extent(data));
+    } else {
+      colorScale = d3.scaleSequential(d3.interpolateBlues)
+        .domain(valueRange || d3.extent(data));
+    }
 
     const rect = this.memory.selectAll('rect')
       .data(data);
@@ -50,9 +57,9 @@ export default class extends Chart {
       .merge(rect)
       .attr('width', rectSize)
       .attr('height', rectSize)
-      .attr('x', (d, i) => (i % rowNames.length) * rectSize)
-      .attr('y', (d, i) => Math.floor(i / rowNames.length) * rectSize)
-      .attr('fillRect', 'black');
+      .attr('x', (d, i) => (i % colNames.length) * rectSize)
+      .attr('y', (d, i) => Math.floor(i / colNames.length) * rectSize)
+      .attr('fillStyle', d => colorScale(d));
 
     rect.exit()
       .remove();
@@ -64,10 +71,28 @@ export default class extends Chart {
       .append('text')
       .attr('class', 'row-label')
       .attr('text-anchor', 'end')
-      .attr('x', 0)
-      .attr('y', (d, i) => (i + 0.5) * rectSize)
+      .attr('transform', (d, i) => `translate(0, ${(i + 0.5) * rectSize})rotate(-45)`)
       .style('font-size', '10px') // FIXME: needs to be dynamic
-      .text(d => d);
+      .text(d => d)
+      .on('click', (_, i) => {
+        const sortedData = data
+          .map((d, j) => [d, j])
+          .sort((a, b) => {
+            const rowIdxA = Math.floor(a[1] / colNames.length);
+            const rowIdxB = Math.floor(b[1] / colNames.length);
+            if (rowIdxA < rowIdxB) {
+              return -1;
+            }
+            if (rowIdxA > rowIdxB) {
+              return 1;
+            }
+            const valA = data[(i * colNames.length) + (b[1] % rowNames.length)];
+            const valB = data[(i * colNames.length) + (a[1] % rowNames.length)];
+            return valB - valA;
+          })
+          .map(d => d[0]);
+        this.update({ data: sortedData, valueRange, rowNames, colNames, sequential });
+      });
 
     const colLabels = this.svg.selectAll('text.col-label')
       .data(colNames);
@@ -89,7 +114,7 @@ export default class extends Chart {
       .each(function () {
         const node = d3.select(this);
         context.fillStyle = node.attr('fillStyle');
-        context.strokeRect(node.attr('x'), node.attr('y'), node.attr('width'), node.attr('height'));
+        context.fillRect(node.attr('x'), node.attr('y'), node.attr('width'), node.attr('height'));
       });
   }
 }

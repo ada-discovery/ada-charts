@@ -3,5 +3,9 @@
   "env": {
     "browser": true
   },
-  "plugins": []
+  "plugins": [],
+  "rules": {
+    "array-callback-return": "off",
+    "object-curly-newline": "off"
+  }
 }
