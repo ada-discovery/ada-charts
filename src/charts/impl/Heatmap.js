@@ -2,6 +2,8 @@ import * as d3 from 'd3';
 import Chart from '../Chart';
 import '../../assets/heatmap.css';
 
+const ANIMATION_DURATION = 1000;
+
 const margin = {
   top: 50,
   right: 50,
@@ -35,7 +37,10 @@ export default class extends Chart {
 
   update({ data, valueRange, title, rowNames, colNames, sequential }) {
     this.databind(data, valueRange, rowNames, colNames, sequential);
-    this.draw(this.canvas);
+    const timer = d3.timer((elapsed) => {
+      this.draw(this.canvas);
+      if (elapsed > 5000) timer.stop();
+    });
   }
 
   databind(data, valueRange, rowNames, colNames, sequential) {
@@ -57,6 +62,8 @@ export default class extends Chart {
     rect.enter()
       .append('rect')
       .merge(rect)
+      .transition()
+      .duration(ANIMATION_DURATION)
       .attr('width', rectSize)
       .attr('height', rectSize)
       .attr('x', (d, i) => (i % colNames.length) * rectSize)
