@@ -38,6 +38,7 @@ export default class extends Chart {
   }
 
   databind(data, valueRange, rowNames, colNames, sequential) {
+    function getMatrixIndex(row, col) { return row * colNames.length + col; }
     const rectSize = Math.floor(height / rowNames.length); // FIXME: this is just a placeholder
 
     let colorScale = null;
@@ -74,24 +75,22 @@ export default class extends Chart {
       .attr('transform', (d, i) => `translate(0, ${(i + 0.5) * rectSize})rotate(-45)`)
       .style('font-size', '10px') // FIXME: needs to be dynamic
       .text(d => d)
-      .on('click', (_, i) => {
-        const sortedData = data
-          .map((d, j) => [d, j])
-          .sort((a, b) => {
-            const rowIdxA = Math.floor(a[1] / colNames.length);
-            const rowIdxB = Math.floor(b[1] / colNames.length);
-            if (rowIdxA < rowIdxB) {
-              return -1;
-            }
-            if (rowIdxA > rowIdxB) {
-              return 1;
-            }
-            const valA = data[(i * colNames.length) + (b[1] % rowNames.length)];
-            const valB = data[(i * colNames.length) + (a[1] % rowNames.length)];
-            return valB - valA;
-          })
-          .map(d => d[0]);
-        this.update({ data: sortedData, valueRange, rowNames, colNames, sequential });
+      .on('click', (_, rowIdx) => {
+        const sortValues = data.slice(rowIdx * colNames.length, (rowIdx + 1) * colNames.length);
+        const sortOrder = d3.range(0, colNames.length, 1)
+          .sort((k, l) => {
+            if (sortValues[k] < sortValues[l]) return -1;
+            if (sortValues[k] > sortValues[l]) return 1;
+            return 0;
+          });
+        const newData = [];
+        for (let i = 0; i < rowNames.length; i += 1) {
+          sortOrder.forEach((sortIdx) => {
+            newData.push(data[getMatrixIndex(i, sortIdx)]);
+          });
+        }
+        const newColNames = sortOrder.map(sortIdx => colNames[sortIdx]);
+        this.update({ data: newData, valueRange, rowNames, colNames: newColNames, sequential });
       });
 
     const colLabels = this.svg.selectAll('text.col-label')
@@ -101,8 +100,9 @@ export default class extends Chart {
       .append('text')
       .attr('class', 'col-label')
       .attr('text-anchor', 'end')
-      .style('transform', (d, i) => `translate(${(i + 0.5) * rectSize}px, 0px)rotate(45deg)`)
       .style('font-size', '10px') // FIXME: needs to be dynamic
+      .merge(colLabels)
+      .style('transform', (d, i) => `translate(${(i + 0.5) * rectSize}px, 0px)rotate(45deg)`)
       .text(d => d);
   }
 
