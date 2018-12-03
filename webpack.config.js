@@ -12,6 +12,17 @@ module.exports = {
     hotUpdateChunkFilename: 'hot/hot-update.js',
     hotUpdateMainFilename: 'hot/hot-update.json',
   },
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: [
+          { loader: 'style-loader' },
+          { loader: 'css-loader' },
+        ],
+      },
+    ],
+  },
   devtool: '#inline-source-map',
   context: __dirname,
   target: 'web',

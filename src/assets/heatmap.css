@@ -1,0 +1,4 @@
+:hover.row-label,:hover.col-label {
+    cursor: pointer;
+    fill: red;
+}

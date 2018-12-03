@@ -1,5 +1,6 @@
 import * as d3 from 'd3';
 import Chart from '../Chart';
+import '../../assets/heatmap.css';
 
 const margin = {
   top: 50,
