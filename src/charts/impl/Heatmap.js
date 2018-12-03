@@ -72,8 +72,9 @@ export default class extends Chart {
       .append('text')
       .attr('class', 'row-label')
       .attr('text-anchor', 'end')
-      .attr('transform', (d, i) => `translate(0, ${(i + 0.5) * rectSize})rotate(-45)`)
       .style('font-size', '10px') // FIXME: needs to be dynamic
+      .merge(rowLabels)
+      .attr('transform', (d, i) => `translate(0, ${(i + 0.5) * rectSize})rotate(-45)`)
       .text(d => d)
       .on('click', (_, rowIdx) => {
         const sortValues = data.slice(rowIdx * colNames.length, (rowIdx + 1) * colNames.length);
