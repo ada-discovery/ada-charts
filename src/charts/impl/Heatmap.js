@@ -103,7 +103,24 @@ export default class extends Chart {
       .style('font-size', '10px') // FIXME: needs to be dynamic
       .merge(colLabels)
       .style('transform', (d, i) => `translate(${(i + 0.5) * rectSize}px, 0px)rotate(45deg)`)
-      .text(d => d);
+      .text(d => d)
+      .on('click', (_, colIdx) => {
+        const sortValues = rowNames.map((__, i) => data[getMatrixIndex(i, colIdx)]);
+        const sortOrder = d3.range(0, rowNames.length, 1)
+          .sort((k, l) => {
+            if (sortValues[k] < sortValues[l]) return -1;
+            if (sortValues[k] > sortValues[l]) return 1;
+            return 0;
+          });
+        const newData = [];
+        sortOrder.forEach((sortIdx) => {
+          for (let i = 0; i < colNames.length; i += 1) {
+            newData.push(data[getMatrixIndex(sortIdx, i)]);
+          }
+        });
+        const newRowNames = sortOrder.map(sortIdx => rowNames[sortIdx]);
+        this.update({ data: newData, valueRange, rowNames: newRowNames, colNames, sequential });
+      });
   }
 
   draw(canvas) {
