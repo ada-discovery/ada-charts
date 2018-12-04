@@ -6,30 +6,45 @@
     <script src="http://localhost:8080/ada-charts.js"></script>
 </head>
 <body>
-    <div id="heatmap-container"></div>
+<div id="heatmap-container"></div>
 </body>
 
 </html>
 
 <script>
-    const container = document.querySelector('#heatmap-container');
-    const heatmap = AdaCharts.chart({ chartType: 'heatmap', container });
-    heatmap.update({
-      // data: [0, 1, 3, 2],
-      // rowNames: ['A', 'B'],
-      // colNames: ['a', 'b'],
-      title: 'Correlations',
-      data: [1, 0.6997416730183142, -0.29628389941597716, -0.6279173805293008, 0.18412161271303787, -0.35819237583867736, -0.1602431191307706, 0.6997416730183142, 1, -0.4230351005269855, -0.4438241608646983, 0.27089441906720413, -0.4540784161973978, -0.22110543494560858, -0.29628389941597716, -0.4230351005269855, 1, 0.19988596824381763, -0.34487036108378405, 0.3645420902772759, 0.5910901002900717, -0.6279173805293008, -0.4438241608646983, 0.19988596824381763, 1, -0.16746121346398238, 0.22674392710482927, 0.12165768098716498, 0.18412161271303787, 0.27089441906720413, -0.34487036108378405, -0.16746121346398238, 1, -0.41194311422982127, -0.08549287142639136, -0.35819237583867736, -0.4540784161973978, 0.3645420902772759, 0.22674392710482927, -0.41194311422982127, 1, 0.20141771903103936, -0.1602431191307706, -0.22110543494560858, 0.5910901002900717, 0.12165768098716498, -0.08549287142639136, 0.20141771903103936, 1],
-      rowNames:  ["MDS UPDRS Total Score (Part I)", "MDS UPDRS Total Score (Part II)", "Sniff Total Score", "PDSS Total Score", "Age at Basic Assessment", "Total Points for MOCA:", "Cerad Total Score"],
-      colNames: ["MDS UPDRS Total Score (Part I)", "MDS UPDRS Total Score (Part II)", "Sniff Total Score", "PDSS Total Score", "Age at Basic Assessment", "Total Points for MOCA:", "Cerad Total Score"],
-      valueRange: [-1, 1],
-      sequential: true
-    });
+  const values = [];
+  const rows = [];
+  const cols = [];
+  const min = -1;
+  const max = 1;
+  for (let i = 0; i < 100; i += 1) {
+    rows.push(`row: ${i}`);
+    for (let j = 0; j < 100; j += 1) {
+      values.push(Math.random() * (max - min + 1) + min);
+      if (i === 0) {
+        cols.push(`col: ${j}`);
+      }
+    }
+  }
+
+  const container = document.querySelector('#heatmap-container');
+  const heatmap = AdaCharts.chart({ chartType: 'heatmap', container });
+  heatmap.update({
+    title: 'Correlations',
+    // values: [1, 0.6997416730183142, -0.29628389941597716, -0.6279173805293008, 0.18412161271303787, -0.35819237583867736, -0.1602431191307706, 0.6997416730183142, 1, -0.4230351005269855, -0.4438241608646983, 0.27089441906720413, -0.4540784161973978, -0.22110543494560858, -0.29628389941597716, -0.4230351005269855, 1, 0.19988596824381763, -0.34487036108378405, 0.3645420902772759, 0.5910901002900717, -0.6279173805293008, -0.4438241608646983, 0.19988596824381763, 1, -0.16746121346398238, 0.22674392710482927, 0.12165768098716498, 0.18412161271303787, 0.27089441906720413, -0.34487036108378405, -0.16746121346398238, 1, -0.41194311422982127, -0.08549287142639136, -0.35819237583867736, -0.4540784161973978, 0.3645420902772759, 0.22674392710482927, -0.41194311422982127, 1, 0.20141771903103936, -0.1602431191307706, -0.22110543494560858, 0.5910901002900717, 0.12165768098716498, -0.08549287142639136, 0.20141771903103936, 1],
+    // rows:  ["MDS UPDRS Total Score (Part I)", "MDS UPDRS Total Score (Part II)", "Sniff Total Score", "PDSS Total Score", "Age at Basic Assessment", "Total Points for MOCA:", "Cerad Total Score"],
+    // cols: ["MDS UPDRS Total Score (Part I)", "MDS UPDRS Total Score (Part II)", "Sniff Total Score", "PDSS Total Score", "Age at Basic Assessment", "Total Points for MOCA:", "Cerad Total Score"],
+    values,
+    rows,
+    cols,
+    valueRange: [-1, 1],
+    sequential: true
+  });
 </script>
 
 <style>
     #heatmap-container {
-        width: 500px;
-        height: 500px;
+        width: 100vw;
+        height: 100vh;
     }
 </style>
