@@ -14,6 +14,9 @@ export default {
     if (typeof Chart === 'undefined') {
       throw Error(`Chart type "${chartType}" not implemented.`);
     }
-    return new Chart({ container });
+    const wrapper = document.createElement('div');
+    wrapper.style.position = 'relative';
+    container.appendChild(wrapper);
+    return new Chart({ container: wrapper });
   },
 };
