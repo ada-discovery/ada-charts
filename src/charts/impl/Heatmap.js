@@ -51,8 +51,10 @@ export default class extends Chart {
     }
 
     this.databind({ data: this.data, rows, cols, valueRange, sequential });
+    // eslint-disable-next-line func-names
+    const nodes = this.memory.selectAll('rect').nodes();
     const timer = d3.timer((elapsed) => {
-      this.draw(this.canvas);
+      this.draw(nodes);
       if (elapsed > ANIMATION_DURATION) timer.stop();
     });
   }
@@ -79,7 +81,13 @@ export default class extends Chart {
 
     rect.enter()
       .append('rect')
-      .merge(rect)
+      .attr('width', rectSize)
+      .attr('height', rectSize)
+      .attr('x', d => colMapping[d.col] * rectSize)
+      .attr('y', d => rowMapping[d.row] * rectSize)
+      .attr('fillStyle', d => colorScale(d.value));
+
+    rect
       .transition()
       .duration(ANIMATION_DURATION)
       .attr('width', rectSize)
@@ -130,15 +138,17 @@ export default class extends Chart {
       });
   }
 
-  draw(canvas) {
-    const context = canvas.getContext('2d');
+  draw(nodes) {
+    const context = this.canvas.getContext('2d');
     context.clearRect(0, 0, width, height);
-    this.memory.selectAll('rect') // FIXME: save this selection to improve performance
-    // eslint-disable-next-line func-names
-      .each(function () {
-        const node = d3.select(this);
-        context.fillStyle = node.attr('fillStyle');
-        context.fillRect(node.attr('x'), node.attr('y'), node.attr('width'), node.attr('height'));
-      });
+    nodes.forEach((node) => {
+      context.fillStyle = node.getAttribute('fillStyle');
+      context.fillRect(
+        node.getAttribute('x'),
+        node.getAttribute('y'),
+        node.getAttribute('width'),
+        node.getAttribute('height'),
+      );
+    });
   }
 }
