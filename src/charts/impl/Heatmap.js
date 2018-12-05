@@ -123,7 +123,7 @@ export default class extends Chart {
     rect.exit()
       .remove();
 
-    const rowLabels = this.svg.selectAll('text.row-label')
+    const rowLabels = this.svg.selectAll('text.ac-row-label')
       .data(this.rows, d => d);
 
     rowLabels.enter()
@@ -150,7 +150,7 @@ export default class extends Chart {
     rowLabels.exit()
       .remove();
 
-    const colLabels = this.svg.selectAll('text.col-label')
+    const colLabels = this.svg.selectAll('text.ac-col-label')
       .data(this.cols, d => d);
 
     colLabels.enter()
