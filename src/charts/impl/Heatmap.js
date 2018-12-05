@@ -20,8 +20,8 @@ export default class extends Chart {
     this.canvas = d3.select(container)
       .append('canvas')
       .attr('class', 'ac-canvas')
-      .attr('width', width + margin.left + margin.right)
-      .attr('height', height + margin.top + margin.bottom)
+      .attr('width', width)
+      .attr('height', height)
       .style('transform', `translate(${margin.left}px, ${margin.top}px)`)
       .node();
     this.svg = d3.select(container).append('svg')
@@ -177,19 +177,21 @@ export default class extends Chart {
     colLabels.exit()
       .remove();
 
-    d3.select(this.canvas).on('mousemove', (_, i, arr) => {
-      const [x, y] = d3.mouse(arr[i]);
+    d3.select(this.canvas)
+      .on('mousemove', (_, i, arr) => {
+        const [x, y] = d3.mouse(arr[i]);
 
-      const xBands = this.xScale.step();
-      const xBandIdx = Math.floor(x / xBands);
-      const col = this.xScale.domain()[xBandIdx];
+        const xBands = this.xScale.step();
+        const xBandIdx = Math.floor(x / xBands);
+        const col = this.xScale.domain()[xBandIdx];
 
-      const yBands = this.yScale.step();
-      const yBandIdx = Math.floor(y / yBands);
-      const row = this.yScale.domain()[yBandIdx];
+        const yBands = this.yScale.step();
+        const yBandIdx = Math.floor(y / yBands);
+        const row = this.yScale.domain()[yBandIdx];
 
-      this.highlight({ row, col });
-    });
+        this.highlight({ row, col });
+      })
+      .on('mouseleave', () => this.highlight({}));
 
     const nodes = this.memory.selectAll('rect').nodes();
     const timer = d3.timer((elapsed) => {
@@ -199,15 +201,19 @@ export default class extends Chart {
   }
 
   highlight({ row, col }) {
-    this.horiHL.style('top', `${this.yScale(row) + margin.top}px`);
-    this.vertHL.style('left', `${this.xScale(col) + margin.left}px`);
+    this.horiHL
+      .style('visibility', typeof row === 'undefined' ? 'hidden' : 'visible')
+      .style('top', `${this.yScale(row) + margin.top}px`);
+    this.vertHL
+      .style('visibility', typeof col === 'undefined' ? 'hidden' : 'visible')
+      .style('left', `${this.xScale(col) + margin.left}px`);
     this.svg.selectAll('text.ac-row-label')
       .classed('highlight', false)
-      .filter(d => d === row)
+      .filter(d => d === row && typeof row !== 'undefined')
       .classed('highlight', true);
     this.svg.selectAll('text.ac-col-label')
       .classed('highlight', false)
-      .filter(d => d === col)
+      .filter(d => d === col && typeof col !== 'undefined')
       .classed('highlight', true);
   }
 
