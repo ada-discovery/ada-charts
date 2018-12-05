@@ -123,9 +123,8 @@ export default class extends Chart {
       .append('text')
       .attr('class', 'row-label')
       .attr('text-anchor', 'end')
-      .style('font-size', '10px') // FIXME: needs to be dynamic
-      .merge(rowLabels)
       .attr('transform', d => `translate(0, ${yScale(d) + 0.5 * yScale.bandwidth()})rotate(-45)`)
+      .style('font-size', '10px') // FIXME: needs to be dynamic
       .text(d => d)
       .on('click', (row) => {
         this.cols = this.data
@@ -135,6 +134,15 @@ export default class extends Chart {
         this.update({});
       });
 
+    rowLabels
+      .transition()
+      .duration(ANIMATION_DURATION)
+      .attr('transform', d => `translate(0, ${yScale(d) + 0.5 * yScale.bandwidth()})rotate(-45)`)
+      .text(d => d);
+
+    rowLabels.exit()
+      .remove();
+
     const colLabels = this.svg.selectAll('text.col-label')
       .data(this.cols, d => d);
 
@@ -143,7 +151,6 @@ export default class extends Chart {
       .attr('class', 'col-label')
       .attr('text-anchor', 'end')
       .style('font-size', '10px') // FIXME: needs to be dynamic
-      .merge(colLabels)
       .style('transform', d => `translate(${xScale(d) + 0.5 * xScale.bandwidth()}px, 0px)rotate(45deg)`)
       .text(d => d)
       .on('click', (col) => {
@@ -153,6 +160,15 @@ export default class extends Chart {
           .map(d => d.row);
         this.update({});
       });
+
+    colLabels
+      .transition()
+      .duration(ANIMATION_DURATION)
+      .style('transform', d => `translate(${xScale(d) + 0.5 * xScale.bandwidth()}px, 0px)rotate(45deg)`)
+      .text(d => d);
+
+    colLabels.exit()
+      .remove();
 
     const that = this;
     d3.select(this.canvas).on('mousemove', function () {
@@ -175,7 +191,6 @@ export default class extends Chart {
       d.highlight = (d.row === row && typeof d.row !== 'undefined')
         || (d.col === col && typeof d.col !== 'undefined');
     });
-    this.update({});
   }
 
   draw(nodes) {
