@@ -2,9 +2,10 @@
     position: absolute;
 }
 
-:hover.ac-row-label,:hover.ac-col-label {
+:hover.ac-row-label,.ac-row-label.highlight,:hover.ac-col-label,.ac-col-label.highlight{
     cursor: pointer;
     fill: red;
+    font-weight: bold;
 }
 
 .ac-vert-hl,.ac-hori-hl {
@@ -12,3 +13,4 @@
     position: absolute;
     pointer-events: none;
 }
+

@@ -201,6 +201,14 @@ export default class extends Chart {
   highlight({ row, col }) {
     this.horiHL.style('top', `${this.yScale(row) + margin.top}px`);
     this.vertHL.style('left', `${this.xScale(col) + margin.left}px`);
+    this.svg.selectAll('text.ac-row-label')
+      .classed('highlight', false)
+      .filter(d => d === row)
+      .classed('highlight', true);
+    this.svg.selectAll('text.ac-col-label')
+      .classed('highlight', false)
+      .filter(d => d === col)
+      .classed('highlight', true);
   }
 
   draw(nodes) {
