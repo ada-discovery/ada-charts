@@ -14,3 +14,11 @@
     pointer-events: none;
 }
 
+.ac-tooltip {
+    width: 2vw;
+    height: 1vh;
+    position: absolute;
+    background: black;
+    pointer-events: none;
+}
+

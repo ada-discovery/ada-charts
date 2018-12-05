@@ -35,6 +35,9 @@ export default class extends Chart {
     this.horiHL = d3.select(container)
       .append('div')
       .attr('class', 'ac-hori-hl');
+    this.tooltip = d3.select(container)
+      .append('div')
+      .attr('class', 'ac-tooltip');
     this.data = [];
     this.valueRange = [];
     this.rows = [];
@@ -207,6 +210,9 @@ export default class extends Chart {
     this.vertHL
       .style('visibility', typeof col === 'undefined' ? 'hidden' : 'visible')
       .style('left', `${this.xScale(col) + margin.left}px`);
+    this.tooltip
+      .style('left', `${this.xScale(col) + margin.left}px`)
+      .style('top', `${this.yScale(row) + margin.top}px`);
     this.svg.selectAll('text.ac-row-label')
       .classed('highlight', false)
       .filter(d => d === row && typeof row !== 'undefined')
