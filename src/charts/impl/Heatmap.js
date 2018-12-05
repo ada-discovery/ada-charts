@@ -30,27 +30,39 @@ export default class extends Chart {
       .append('g')
       .attr('transform', `translate(${margin.left}, ${margin.top})`);
     this.data = [];
+    this.valueRange = [];
+    this.rows = [];
+    this.cols = [];
+    this.title = '';
+    this.sequential = true;
   }
 
   static get name() {
     return 'heatmap';
   }
 
-  prepareData({ values, rows, cols }) {
-    this.data = [];
+  prepareValues({ values, rows, cols }) {
+    const data = [];
     rows.forEach((row, i) => {
       cols.forEach((col, j) => {
-        this.data.push({ value: values[i * rows.length + j], row, col });
+        data.push({ value: values[i * rows.length + j], row, col });
       });
     });
+    return data;
   }
 
   update({ values, valueRange, title, rows, cols, sequential }) {
+    this.title = typeof title === 'undefined' ? this.title : title;
+    this.valueRange = typeof valueRange === 'undefined' ? this.valueRange : valueRange;
+    this.rows = typeof rows === 'undefined' ? this.rows : rows;
+    this.cols = typeof cols === 'undefined' ? this.cols : cols;
+    this.sequential = typeof sequential === 'undefined' ? this.sequential : sequential;
+
     if (typeof values !== 'undefined') {
-      this.prepareData({ values, rows, cols });
+      this.data = this.prepareValues({ values, rows: this.rows, cols: this.cols });
     }
 
-    this.databind({ data: this.data, rows, cols, valueRange, sequential });
+    this.databind();
     const nodes = this.memory.selectAll('rect').nodes();
     const timer = d3.timer((elapsed) => {
       this.draw(nodes);
@@ -58,27 +70,27 @@ export default class extends Chart {
     });
   }
 
-  databind({ rows, cols, valueRange, sequential }) {
+  databind() {
     const rowMapping = {};
     const colMapping = {};
-    rows.forEach((d, i) => { rowMapping[d] = i; });
-    cols.forEach((d, i) => { colMapping[d] = i; });
+    this.rows.forEach((d, i) => { rowMapping[d] = i; });
+    this.cols.forEach((d, i) => { colMapping[d] = i; });
 
     const xScale = d3.scaleBand()
-      .domain(cols)
+      .domain(this.cols)
       .range([0, width]);
 
     const yScale = d3.scaleBand()
-      .domain(rows)
+      .domain(this.rows)
       .range([0, height]);
 
     let colorScale = null;
-    if (sequential) {
+    if (this.sequential) {
       colorScale = d3.scaleSequential(d3.interpolateRdBu)
-        .domain(valueRange);
+        .domain(this.valueRange);
     } else {
       colorScale = d3.scaleSequential(d3.interpolateBlues)
-        .domain(valueRange);
+        .domain(this.valueRange);
     }
 
     const rect = this.memory.selectAll('rect')
@@ -93,19 +105,19 @@ export default class extends Chart {
       .attr('fillStyle', d => colorScale(d.value));
 
     rect
+      .attr('fillStyle', (d) => d.highlight ? 'black' : colorScale(d.value))
       .transition()
       .duration(ANIMATION_DURATION)
       .attr('width', xScale.bandwidth())
       .attr('height', yScale.bandwidth())
       .attr('x', d => xScale(d.col))
-      .attr('y', d => yScale(d.row))
-      .attr('fillStyle', d => colorScale(d.value));
+      .attr('y', d => yScale(d.row));
 
     rect.exit()
       .remove();
 
     const rowLabels = this.svg.selectAll('text.row-label')
-      .data(rows, d => d);
+      .data(this.rows, d => d);
 
     rowLabels.enter()
       .append('text')
@@ -116,15 +128,15 @@ export default class extends Chart {
       .attr('transform', d => `translate(0, ${yScale(d) + 0.5 * yScale.bandwidth()})rotate(-45)`)
       .text(d => d)
       .on('click', (row) => {
-        const newCols = this.data
+        this.cols = this.data
           .filter(d => d.row === row)
           .sort((a, b) => b.value - a.value)
           .map(d => d.col);
-        this.update({ rows, cols: newCols, valueRange, sequential });
+        this.update({});
       });
 
     const colLabels = this.svg.selectAll('text.col-label')
-      .data(cols, d => d);
+      .data(this.cols, d => d);
 
     colLabels.enter()
       .append('text')
@@ -135,26 +147,35 @@ export default class extends Chart {
       .style('transform', d => `translate(${xScale(d) + 0.5 * xScale.bandwidth()}px, 0px)rotate(45deg)`)
       .text(d => d)
       .on('click', (col) => {
-        const newRows = this.data
+        this.rows = this.data
           .filter(d => d.col === col)
           .sort((a, b) => b.value - a.value)
           .map(d => d.row);
-        this.update({ rows: newRows, cols, valueRange, sequential });
+        this.update({});
       });
 
-    d3.select(this.canvas).on('mousemove', function() {
+    const that = this;
+    d3.select(this.canvas).on('mousemove', function () {
       const [x, y] = d3.mouse(this);
 
       const xBands = xScale.step();
       const xBandIdx = Math.floor(x / xBands);
-      const col = yScale.domain()[xBandIdx];
+      const col = xScale.domain()[xBandIdx];
 
       const yBands = yScale.step();
       const yBandIdx = Math.floor(y / yBands);
       const row = yScale.domain()[yBandIdx];
 
-      console.log([col, row]);
+      that.highlight({ row, col });
     });
+  }
+
+  highlight({ row, col }) {
+    this.data.forEach((d) => {
+      d.highlight = (d.row === row && typeof d.row !== 'undefined')
+        || (d.col === col && typeof d.col !== 'undefined');
+    });
+    this.update({});
   }
 
   draw(nodes) {
