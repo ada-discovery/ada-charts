@@ -6,6 +6,7 @@
   "plugins": [],
   "rules": {
     "array-callback-return": "off",
-    "object-curly-newline": "off"
+    "object-curly-newline": "off",
+    "func-names": "off"
   }
 }

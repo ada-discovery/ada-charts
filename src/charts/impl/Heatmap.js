@@ -51,7 +51,6 @@ export default class extends Chart {
     }
 
     this.databind({ data: this.data, rows, cols, valueRange, sequential });
-    // eslint-disable-next-line func-names
     const nodes = this.memory.selectAll('rect').nodes();
     const timer = d3.timer((elapsed) => {
       this.draw(nodes);
@@ -65,7 +64,13 @@ export default class extends Chart {
     rows.forEach((d, i) => { rowMapping[d] = i; });
     cols.forEach((d, i) => { colMapping[d] = i; });
 
-    const rectSize = Math.floor(height / rows.length); // FIXME: this is just a placeholder
+    const xScale = d3.scaleBand()
+      .domain(cols)
+      .range([0, width]);
+
+    const yScale = d3.scaleBand()
+      .domain(rows)
+      .range([0, height]);
 
     let colorScale = null;
     if (sequential) {
@@ -81,19 +86,19 @@ export default class extends Chart {
 
     rect.enter()
       .append('rect')
-      .attr('width', rectSize)
-      .attr('height', rectSize)
-      .attr('x', d => colMapping[d.col] * rectSize)
-      .attr('y', d => rowMapping[d.row] * rectSize)
+      .attr('width', xScale.bandwidth())
+      .attr('height', yScale.bandwidth())
+      .attr('x', d => xScale(d.col))
+      .attr('y', d => yScale(d.row))
       .attr('fillStyle', d => colorScale(d.value));
 
     rect
       .transition()
       .duration(ANIMATION_DURATION)
-      .attr('width', rectSize)
-      .attr('height', rectSize)
-      .attr('x', d => colMapping[d.col] * rectSize)
-      .attr('y', d => rowMapping[d.row] * rectSize)
+      .attr('width', xScale.bandwidth())
+      .attr('height', yScale.bandwidth())
+      .attr('x', d => xScale(d.col))
+      .attr('y', d => yScale(d.row))
       .attr('fillStyle', d => colorScale(d.value));
 
     rect.exit()
@@ -108,7 +113,7 @@ export default class extends Chart {
       .attr('text-anchor', 'end')
       .style('font-size', '10px') // FIXME: needs to be dynamic
       .merge(rowLabels)
-      .attr('transform', d => `translate(0, ${(rowMapping[d] + 0.5) * rectSize})rotate(-45)`)
+      .attr('transform', d => `translate(0, ${yScale(d) + 0.5 * yScale.bandwidth()})rotate(-45)`)
       .text(d => d)
       .on('click', (row) => {
         const newCols = this.data
@@ -127,7 +132,7 @@ export default class extends Chart {
       .attr('text-anchor', 'end')
       .style('font-size', '10px') // FIXME: needs to be dynamic
       .merge(colLabels)
-      .style('transform', d => `translate(${(colMapping[d] + 0.5) * rectSize}px, 0px)rotate(45deg)`)
+      .style('transform', d => `translate(${xScale(d) + 0.5 * xScale.bandwidth()}px, 0px)rotate(45deg)`)
       .text(d => d)
       .on('click', (col) => {
         const newRows = this.data
@@ -136,6 +141,20 @@ export default class extends Chart {
           .map(d => d.row);
         this.update({ rows: newRows, cols, valueRange, sequential });
       });
+
+    d3.select(this.canvas).on('mousemove', function() {
+      const [x, y] = d3.mouse(this);
+
+      const xBands = xScale.step();
+      const xBandIdx = Math.floor(x / xBands);
+      const col = yScale.domain()[xBandIdx];
+
+      const yBands = yScale.step();
+      const yBandIdx = Math.floor(y / yBands);
+      const row = yScale.domain()[yBandIdx];
+
+      console.log([col, row]);
+    });
   }
 
   draw(nodes) {
