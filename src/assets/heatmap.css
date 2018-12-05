@@ -1,4 +1,14 @@
-:hover.row-label,:hover.col-label {
+.ac-canvas {
+    position: absolute;
+}
+
+:hover.ac-row-label,:hover.ac-col-label {
     cursor: pointer;
     fill: red;
+}
+
+.ac-vert-hl,.ac-hori-hl {
+    /*background: rgba(255, 255, 255, 0.7);*/
+    background: green;
+    position: absolute;
 }

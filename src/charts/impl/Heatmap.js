@@ -19,16 +19,22 @@ export default class extends Chart {
     this.memory = d3.select(document.createElement('memory'));
     this.canvas = d3.select(container)
       .append('canvas')
+      .attr('class', 'ac-canvas')
       .attr('width', width + margin.left + margin.right)
       .attr('height', height + margin.top + margin.bottom)
       .style('transform', `translate(${margin.left}px, ${margin.top}px)`)
-      .style('position', 'absolute')
       .node();
     this.svg = d3.select(container).append('svg')
       .attr('width', width + margin.left + margin.right)
       .attr('height', height + margin.top + margin.bottom)
       .append('g')
       .attr('transform', `translate(${margin.left}, ${margin.top})`);
+    this.vertHL = d3.select(container)
+      .append('div')
+      .attr('class', 'ac-vert-hl');
+    this.horiHL = d3.select(container)
+      .append('div')
+      .attr('class', 'ac-hori-hl');
     this.data = [];
     this.valueRange = [];
     this.rows = [];
@@ -62,25 +68,16 @@ export default class extends Chart {
       this.data = this.prepareValues({ values, rows: this.rows, cols: this.cols });
     }
 
-    this.databind();
-    const nodes = this.memory.selectAll('rect').nodes();
-    const timer = d3.timer((elapsed) => {
-      this.draw(nodes);
-      if (elapsed > ANIMATION_DURATION) timer.stop();
-    });
-  }
-
-  databind() {
     const rowMapping = {};
     const colMapping = {};
     this.rows.forEach((d, i) => { rowMapping[d] = i; });
     this.cols.forEach((d, i) => { colMapping[d] = i; });
 
-    const xScale = d3.scaleBand()
+    this.xScale = d3.scaleBand()
       .domain(this.cols)
       .range([0, width]);
 
-    const yScale = d3.scaleBand()
+    this.yScale = d3.scaleBand()
       .domain(this.rows)
       .range([0, height]);
 
@@ -93,25 +90,35 @@ export default class extends Chart {
         .domain(this.valueRange);
     }
 
+    this.horiHL
+      .style('left', `${margin.left}px`)
+      .style('width', `${width}px`)
+      .style('height', `${this.yScale.bandwidth()}px`);
+
+    this.vertHL
+      .style('top', `${margin.top}px`)
+      .style('width', `${this.xScale.bandwidth()}px`)
+      .style('height', `${height}px`);
+
     const rect = this.memory.selectAll('rect')
       .data(this.data, d => `${d.row}-${d.col}`);
 
     rect.enter()
       .append('rect')
-      .attr('width', xScale.bandwidth())
-      .attr('height', yScale.bandwidth())
-      .attr('x', d => xScale(d.col))
-      .attr('y', d => yScale(d.row))
+      .attr('width', this.xScale.bandwidth())
+      .attr('height', this.yScale.bandwidth())
+      .attr('x', d => this.xScale(d.col))
+      .attr('y', d => this.yScale(d.row))
       .attr('fillStyle', d => colorScale(d.value));
 
     rect
       .attr('fillStyle', (d) => d.highlight ? 'black' : colorScale(d.value))
       .transition()
       .duration(ANIMATION_DURATION)
-      .attr('width', xScale.bandwidth())
-      .attr('height', yScale.bandwidth())
-      .attr('x', d => xScale(d.col))
-      .attr('y', d => yScale(d.row));
+      .attr('width', this.xScale.bandwidth())
+      .attr('height', this.yScale.bandwidth())
+      .attr('x', d => this.xScale(d.col))
+      .attr('y', d => this.yScale(d.row));
 
     rect.exit()
       .remove();
@@ -121,9 +128,9 @@ export default class extends Chart {
 
     rowLabels.enter()
       .append('text')
-      .attr('class', 'row-label')
+      .attr('class', 'ac-row-label')
       .attr('text-anchor', 'end')
-      .attr('transform', d => `translate(0, ${yScale(d) + 0.5 * yScale.bandwidth()})rotate(-45)`)
+      .attr('transform', d => `translate(0, ${this.yScale(d) + 0.5 * this.yScale.bandwidth()})rotate(-45)`)
       .style('font-size', '10px') // FIXME: needs to be dynamic
       .text(d => d)
       .on('click', (row) => {
@@ -137,7 +144,7 @@ export default class extends Chart {
     rowLabels
       .transition()
       .duration(ANIMATION_DURATION)
-      .attr('transform', d => `translate(0, ${yScale(d) + 0.5 * yScale.bandwidth()})rotate(-45)`)
+      .attr('transform', d => `translate(0, ${this.yScale(d) + 0.5 * this.yScale.bandwidth()})rotate(-45)`)
       .text(d => d);
 
     rowLabels.exit()
@@ -148,10 +155,10 @@ export default class extends Chart {
 
     colLabels.enter()
       .append('text')
-      .attr('class', 'col-label')
+      .attr('class', 'ac-col-label')
       .attr('text-anchor', 'end')
       .style('font-size', '10px') // FIXME: needs to be dynamic
-      .style('transform', d => `translate(${xScale(d) + 0.5 * xScale.bandwidth()}px, 0px)rotate(45deg)`)
+      .style('transform', d => `translate(${this.xScale(d) + 0.5 * this.xScale.bandwidth()}px, 0px)rotate(45deg)`)
       .text(d => d)
       .on('click', (col) => {
         this.rows = this.data
@@ -164,33 +171,36 @@ export default class extends Chart {
     colLabels
       .transition()
       .duration(ANIMATION_DURATION)
-      .style('transform', d => `translate(${xScale(d) + 0.5 * xScale.bandwidth()}px, 0px)rotate(45deg)`)
+      .style('transform', d => `translate(${this.xScale(d) + 0.5 * this.xScale.bandwidth()}px, 0px)rotate(45deg)`)
       .text(d => d);
 
     colLabels.exit()
       .remove();
 
-    const that = this;
-    d3.select(this.canvas).on('mousemove', function () {
-      const [x, y] = d3.mouse(this);
+    d3.select(this.canvas).on('mousemove', (_, i, arr) => {
+      const [x, y] = d3.mouse(arr[i]);
 
-      const xBands = xScale.step();
+      const xBands = this.xScale.step();
       const xBandIdx = Math.floor(x / xBands);
-      const col = xScale.domain()[xBandIdx];
+      const col = this.xScale.domain()[xBandIdx];
 
-      const yBands = yScale.step();
+      const yBands = this.yScale.step();
       const yBandIdx = Math.floor(y / yBands);
-      const row = yScale.domain()[yBandIdx];
+      const row = this.yScale.domain()[yBandIdx];
 
-      that.highlight({ row, col });
+      this.highlight({ row, col });
+    });
+
+    const nodes = this.memory.selectAll('rect').nodes();
+    const timer = d3.timer((elapsed) => {
+      this.draw(nodes);
+      if (elapsed > ANIMATION_DURATION) timer.stop();
     });
   }
 
   highlight({ row, col }) {
-    this.data.forEach((d) => {
-      d.highlight = (d.row === row && typeof d.row !== 'undefined')
-        || (d.col === col && typeof d.col !== 'undefined');
-    });
+    this.horiHL.style('top', `${this.yScale(row) + margin.top}px`);
+    this.vertHL.style('left', `${this.xScale(col) + margin.left}px`);
   }
 
   draw(nodes) {
