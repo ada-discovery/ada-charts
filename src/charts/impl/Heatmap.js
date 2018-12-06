@@ -52,6 +52,7 @@ export default class extends Chart {
 
   prepareValues({ values, rows, cols }) {
     const data = [];
+    const coordValueMapping = {};
     rows.forEach((row, i) => {
       cols.forEach((col, j) => {
         data.push({ value: values[i * rows.length + j], row, col });
@@ -70,11 +71,6 @@ export default class extends Chart {
     if (typeof values !== 'undefined') {
       this.data = this.prepareValues({ values, rows: this.rows, cols: this.cols });
     }
-
-    const rowMapping = {};
-    const colMapping = {};
-    this.rows.forEach((d, i) => { rowMapping[d] = i; });
-    this.cols.forEach((d, i) => { colMapping[d] = i; });
 
     this.xScale = d3.scaleBand()
       .domain(this.cols)
@@ -115,7 +111,10 @@ export default class extends Chart {
       .attr('fillStyle', d => colorScale(d.value));
 
     rect
-      .attr('fillStyle', (d) => d.highlight ? 'black' : colorScale(d.value))
+      .attr('fillStyle', (d) => {
+        if (typeof d.value === 'undefined') return 'black';
+        return colorScale(d.value);
+      })
       .transition()
       .duration(ANIMATION_DURATION)
       .attr('width', this.xScale.bandwidth())
@@ -204,6 +203,8 @@ export default class extends Chart {
   }
 
   highlight({ row, col }) {
+    const hoveredData = this.memory.selectAll('rect')
+      .filter(d => d.row === row && d.col === col).data()[0];
     this.horiHL
       .style('visibility', typeof row === 'undefined' ? 'hidden' : 'visible')
       .style('top', `${this.yScale(row) + margin.top}px`);
@@ -211,8 +212,11 @@ export default class extends Chart {
       .style('visibility', typeof col === 'undefined' ? 'hidden' : 'visible')
       .style('left', `${this.xScale(col) + margin.left}px`);
     this.tooltip
-      .style('left', `${this.xScale(col) + margin.left}px`)
-      .style('top', `${this.yScale(row) + margin.top}px`);
+      .style('left', `${this.xScale(col) + margin.left + this.xScale.bandwidth()}px`)
+      .style('top', `${this.yScale(row) + margin.top + this.yScale.bandwidth()}px`)
+      .html(() => Object.keys(hoveredData).map(key => `${key} - ${hoveredData[key]}`).join('</br>'));
+
+    // FIXME: this is expensive
     this.svg.selectAll('text.ac-row-label')
       .classed('highlight', false)
       .filter(d => d === row && typeof row !== 'undefined')
