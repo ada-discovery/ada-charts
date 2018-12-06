@@ -52,10 +52,10 @@ export default class extends Chart {
 
   prepareValues({ values, rows, cols }) {
     const data = [];
-    const coordValueMapping = {};
     rows.forEach((row, i) => {
       cols.forEach((col, j) => {
-        data.push({ value: values[i * rows.length + j], row, col });
+        const value = values[i * rows.length + j];
+        data.push({ value, row, col });
       });
     });
     return data;
@@ -202,6 +202,7 @@ export default class extends Chart {
     });
   }
 
+  // FIXME: this is expensive
   highlight({ row, col }) {
     const hoveredData = this.memory.selectAll('rect')
       .filter(d => d.row === row && d.col === col).data()[0];
@@ -212,11 +213,14 @@ export default class extends Chart {
       .style('visibility', typeof col === 'undefined' ? 'hidden' : 'visible')
       .style('left', `${this.xScale(col) + margin.left}px`);
     this.tooltip
+      .style('visibility', (typeof row === 'undefined' && typeof row === 'undefined') ? 'hidden' : 'visible')
       .style('left', `${this.xScale(col) + margin.left + this.xScale.bandwidth()}px`)
       .style('top', `${this.yScale(row) + margin.top + this.yScale.bandwidth()}px`)
-      .html(() => Object.keys(hoveredData).map(key => `${key} - ${hoveredData[key]}`).join('</br>'));
-
-    // FIXME: this is expensive
+      .html(() => `
+Value &nbsp; ${hoveredData.value}</br>
+Row &nbsp; &nbsp; ${row}</br>
+Col &nbsp; &nbsp; &nbsp; ${col}</br>
+`);
     this.svg.selectAll('text.ac-row-label')
       .classed('highlight', false)
       .filter(d => d === row && typeof row !== 'undefined')

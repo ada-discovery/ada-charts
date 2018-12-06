@@ -20,6 +20,6 @@
     pointer-events: none;
     color: white;
     padding: 0.5vh;
-    border-radius: 8px;
+    visibility: hidden;
 }
 
