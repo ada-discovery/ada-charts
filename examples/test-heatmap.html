@@ -18,11 +18,11 @@
   const min = -1;
   const max = 1;
   for (let i = 0; i < 50; i += 1) {
-    rows.push(`row-----------------------------: ${i}`);
+    rows.push(`row: ${i}`);
     for (let j = 0; j < 50; j += 1) {
       values.push(Math.random() * (max - min + 1) + min);
       if (i === 0) {
-        cols.push(`col----------------------------: ${j}`);
+        cols.push(`col: ${j}`);
       }
     }
   }

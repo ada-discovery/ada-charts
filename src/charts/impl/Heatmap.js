@@ -146,8 +146,8 @@ export default class extends Chart {
     rowLabels.enter()
       .append('text')
       .attr('class', 'ac-row-label')
-      .attr('text-anchor', 'end')
-      .attr('transform', d => `translate(0, ${this.yScale(d) + 0.5 * this.yScale.bandwidth()})`)
+      .style('text-anchor', 'end')
+      .style('transform', d => `translate(0px, ${this.yScale(d) + 0.5 * this.yScale.bandwidth()}px)`)
       .text(d => d)
       .on('click', (row) => {
         this.cols = this.data
@@ -162,7 +162,7 @@ export default class extends Chart {
     rowLabels
       .transition()
       .duration(ANIMATION_DURATION)
-      .attr('transform', d => `translate(0, ${this.yScale(d) + 0.5 * this.yScale.bandwidth()})`);
+      .style('transform', d => `translate(0px, ${this.yScale(d) + 0.5 * this.yScale.bandwidth()}px)`);
 
     rowLabels.exit()
       .remove();
@@ -173,7 +173,7 @@ export default class extends Chart {
     colLabels.enter()
       .append('text')
       .attr('class', 'ac-col-label')
-      .attr('text-anchor', 'end')
+      .style('text-anchor', 'end')
       .style('transform', d => `translate(${this.xScale(d) + 0.5 * this.xScale.bandwidth()}px, 0px)rotate(45deg)`)
       .text(d => d)
       .on('click', (col) => {
@@ -254,8 +254,8 @@ Col &nbsp; &nbsp; &nbsp; ${col}</br>
       context.fillRect(
         node.getAttribute('x'),
         node.getAttribute('y'),
-        node.getAttribute('width'),
-        node.getAttribute('height'),
+        node.getAttribute('width') - 1,
+        node.getAttribute('height') - 1,
       );
     });
   }
