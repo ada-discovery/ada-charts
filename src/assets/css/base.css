@@ -1,5 +1,4 @@
-/*FIXME: make this target only for ada charts*/
-text {
+.ada-chart text {
     font-family: Roboto, sans-serif;
     font-size: 1em;
 }

@@ -16,6 +16,7 @@ export default {
     }
     const wrapper = document.createElement('div');
     wrapper.style.position = 'relative';
+    wrapper.classList.add('ada-chart');
     container.appendChild(wrapper);
     return new Chart({ container: wrapper });
   },

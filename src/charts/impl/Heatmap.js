@@ -144,7 +144,7 @@ export default class extends Chart {
       .append('text')
       .attr('class', 'ac-row-label')
       .style('text-anchor', 'end')
-      .style('transform', d => `translate(0px, ${this.yScale(d) + 0.5 * this.yScale.bandwidth()}px)`)
+      .style('transform', d => `translate(-5px, ${this.yScale(d) + 0.5 * this.yScale.bandwidth()}px)`)
       .text(d => d)
       .on('click', (row) => {
         this.cols = this.data
@@ -159,7 +159,7 @@ export default class extends Chart {
     rowLabels
       .transition()
       .duration(ANIMATION_DURATION)
-      .style('transform', d => `translate(0px, ${this.yScale(d) + 0.5 * this.yScale.bandwidth()}px)`);
+      .style('transform', d => `translate(-5px, ${this.yScale(d) + 0.5 * this.yScale.bandwidth()}px)`);
 
     rowLabels.exit()
       .remove();
@@ -171,7 +171,7 @@ export default class extends Chart {
       .append('text')
       .attr('class', 'ac-col-label')
       .style('text-anchor', 'end')
-      .style('transform', d => `translate(${this.xScale(d) + 0.5 * this.xScale.bandwidth()}px, 0px)rotate(45deg)`)
+      .style('transform', d => `translate(${this.xScale(d) + 0.5 * this.xScale.bandwidth()}px, -5px)rotate(45deg)`)
       .text(d => d)
       .on('click', (col) => {
         this.rows = this.data
@@ -186,7 +186,7 @@ export default class extends Chart {
     colLabels
       .transition()
       .duration(ANIMATION_DURATION)
-      .style('transform', d => `translate(${this.xScale(d) + 0.5 * this.xScale.bandwidth()}px, 0px)rotate(45deg)`);
+      .style('transform', d => `translate(${this.xScale(d) + 0.5 * this.xScale.bandwidth()}px, -5px)rotate(45deg)`);
 
     colLabels.exit()
       .remove();
