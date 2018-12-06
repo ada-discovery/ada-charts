@@ -5,8 +5,8 @@ import '../../assets/css/heatmap.css';
 const ANIMATION_DURATION = 1000;
 
 
-const W = 2000;
-const H = 2000;
+const W = 1000;
+const H = 1000;
 
 const margin = {
   top: H / 10,
@@ -212,10 +212,6 @@ export default class extends Chart {
   }
 
   highlight({ row, col }) {
-    // FIXME: this could be made faster by building an index
-    const hoveredData = this.memory.selectAll('rect')
-      .filter(d => d.row === row && d.col === col).data()[0];
-
     this.horiHL
       .style('visibility', typeof row === 'undefined' ? 'hidden' : 'visible')
       .style('top', `${this.yScale(row) + margin.top}px`);
@@ -225,12 +221,19 @@ export default class extends Chart {
     this.tooltip
       .style('visibility', (typeof row === 'undefined' && typeof row === 'undefined') ? 'hidden' : 'visible')
       .style('left', `${this.xScale(col) + margin.left + this.xScale.bandwidth()}px`)
-      .style('top', `${this.yScale(row) + margin.top + this.yScale.bandwidth()}px`)
-      .html(() => `
+      .style('top', `${this.yScale(row) + margin.top + this.yScale.bandwidth()}px`);
+
+    if (typeof row !== 'undefined' && typeof col !== 'undefined') {
+      // FIXME: this could be made faster by building an index
+      const hoveredData = this.memory.selectAll('rect')
+        .filter(d => d.row === row && d.col === col).data()[0];
+      this.tooltip.html(() => `
 Value &nbsp; ${hoveredData.value}</br>
 Row &nbsp; &nbsp; ${row}</br>
 Col &nbsp; &nbsp; &nbsp; ${col}</br>
 `);
+    }
+
     this.svg.selectAll('text.ac-row-label')
       .classed('highlight', false)
       .filter(d => d === row && typeof row !== 'undefined')
