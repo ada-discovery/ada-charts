@@ -12,6 +12,7 @@
     background: rgba(255, 255, 255, 0.7);
     position: absolute;
     pointer-events: none;
+    visibility: hidden;
 }
 
 .ac-tooltip {

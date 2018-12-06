@@ -4,14 +4,18 @@ import '../../assets/heatmap.css';
 
 const ANIMATION_DURATION = 1000;
 
+
+const W = 1000;
+const H = 1000;
+
 const margin = {
-  top: 50,
-  right: 50,
-  bottom: 50,
-  left: 50,
+  top: H / 10,
+  right: 10,
+  bottom: 10,
+  left: W / 10,
 };
-const width = 1000 - margin.left - margin.right;
-const height = 1000 - margin.top - margin.bottom;
+const width = W - margin.left - margin.right;
+const height = H - margin.top - margin.bottom;
 
 export default class extends Chart {
   constructor({ container }) {
@@ -125,6 +129,17 @@ export default class extends Chart {
     rect.exit()
       .remove();
 
+    function wrap() {
+      const self = d3.select(this);
+      let textLength = self.node().getComputedTextLength();
+      let text = self.text();
+      while (textLength > (margin.left) && text.length > 0) {
+        text = text.slice(0, -1);
+        self.text(`${text}...`);
+        textLength = self.node().getComputedTextLength();
+      }
+    }
+
     const rowLabels = this.svg.selectAll('text.ac-row-label')
       .data(this.rows, d => d);
 
@@ -132,8 +147,7 @@ export default class extends Chart {
       .append('text')
       .attr('class', 'ac-row-label')
       .attr('text-anchor', 'end')
-      .attr('transform', d => `translate(0, ${this.yScale(d) + 0.5 * this.yScale.bandwidth()})rotate(-45)`)
-      .style('font-size', '10px') // FIXME: needs to be dynamic
+      .attr('transform', d => `translate(0, ${this.yScale(d) + 0.5 * this.yScale.bandwidth()})`)
       .text(d => d)
       .on('click', (row) => {
         this.cols = this.data
@@ -141,13 +155,14 @@ export default class extends Chart {
           .sort((a, b) => b.value - a.value)
           .map(d => d.col);
         this.update({});
-      });
+      })
+      .merge(rowLabels)
+      .each(wrap);
 
     rowLabels
       .transition()
       .duration(ANIMATION_DURATION)
-      .attr('transform', d => `translate(0, ${this.yScale(d) + 0.5 * this.yScale.bandwidth()})rotate(-45)`)
-      .text(d => d);
+      .attr('transform', d => `translate(0, ${this.yScale(d) + 0.5 * this.yScale.bandwidth()})`);
 
     rowLabels.exit()
       .remove();
@@ -159,7 +174,6 @@ export default class extends Chart {
       .append('text')
       .attr('class', 'ac-col-label')
       .attr('text-anchor', 'end')
-      .style('font-size', '10px') // FIXME: needs to be dynamic
       .style('transform', d => `translate(${this.xScale(d) + 0.5 * this.xScale.bandwidth()}px, 0px)rotate(45deg)`)
       .text(d => d)
       .on('click', (col) => {
@@ -168,13 +182,14 @@ export default class extends Chart {
           .sort((a, b) => b.value - a.value)
           .map(d => d.row);
         this.update({});
-      });
+      })
+      .merge(colLabels)
+      .each(wrap);
 
     colLabels
       .transition()
       .duration(ANIMATION_DURATION)
-      .style('transform', d => `translate(${this.xScale(d) + 0.5 * this.xScale.bandwidth()}px, 0px)rotate(45deg)`)
-      .text(d => d);
+      .style('transform', d => `translate(${this.xScale(d) + 0.5 * this.xScale.bandwidth()}px, 0px)rotate(45deg)`);
 
     colLabels.exit()
       .remove();
@@ -202,7 +217,7 @@ export default class extends Chart {
     });
   }
 
-  // FIXME: this is expensive
+  // FIXME: this is too expensive
   highlight({ row, col }) {
     const hoveredData = this.memory.selectAll('rect')
       .filter(d => d.row === row && d.col === col).data()[0];
