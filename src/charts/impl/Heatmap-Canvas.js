@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 import Chart from '../Chart';
-import '../../assets/heatmap.css';
+import '../../assets/css/heatmap.css';
 
 const width = 1000;
 const height = 1000;

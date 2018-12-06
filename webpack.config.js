@@ -16,10 +16,20 @@ module.exports = {
     rules: [
       {
         test: /\.css$/,
+        exclude: /node_modules/,
         use: [
           { loader: 'style-loader' },
           { loader: 'css-loader' },
         ],
+      },
+      {
+        test: /\.(woff2?|ttf)$/,
+        exclude: /node_modules/,
+        loader: 'base64-inline-loader',
+        options: {
+          limit: 1000,
+          name: '[name].[ext]',
+        },
       },
     ],
   },

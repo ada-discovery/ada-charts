@@ -1,12 +1,12 @@
 import * as d3 from 'd3';
 import Chart from '../Chart';
-import '../../assets/heatmap.css';
+import '../../assets/css/heatmap.css';
 
 const ANIMATION_DURATION = 1000;
 
 
-const W = 1000;
-const H = 1000;
+const W = 2000;
+const H = 2000;
 
 const margin = {
   top: H / 10,
@@ -46,7 +46,6 @@ export default class extends Chart {
     this.valueRange = [];
     this.rows = [];
     this.cols = [];
-    this.title = '';
     this.sequential = true;
   }
 
@@ -55,25 +54,23 @@ export default class extends Chart {
   }
 
   prepareValues({ values, rows, cols }) {
-    const data = [];
+    this.data = [];
     rows.forEach((row, i) => {
       cols.forEach((col, j) => {
         const value = values[i * rows.length + j];
-        data.push({ value, row, col });
+        this.data.push({ value, row, col });
       });
     });
-    return data;
   }
 
-  update({ values, valueRange, title, rows, cols, sequential }) {
-    this.title = typeof title === 'undefined' ? this.title : title;
+  update({ values, valueRange, rows, cols, sequential }) {
     this.valueRange = typeof valueRange === 'undefined' ? this.valueRange : valueRange;
     this.rows = typeof rows === 'undefined' ? this.rows : rows;
     this.cols = typeof cols === 'undefined' ? this.cols : cols;
     this.sequential = typeof sequential === 'undefined' ? this.sequential : sequential;
 
     if (typeof values !== 'undefined') {
-      this.data = this.prepareValues({ values, rows: this.rows, cols: this.cols });
+      this.prepareValues({ values, rows: this.rows, cols: this.cols });
     }
 
     this.xScale = d3.scaleBand()
@@ -211,16 +208,14 @@ export default class extends Chart {
       .on('mouseleave', () => this.highlight({}));
 
     const nodes = this.memory.selectAll('rect').nodes();
-    const timer = d3.timer((elapsed) => {
-      this.draw(nodes);
-      if (elapsed > ANIMATION_DURATION) timer.stop();
-    });
+    this.draw(nodes);
   }
 
-  // FIXME: this is too expensive
   highlight({ row, col }) {
+    // FIXME: this could be made faster by building an index
     const hoveredData = this.memory.selectAll('rect')
       .filter(d => d.row === row && d.col === col).data()[0];
+
     this.horiHL
       .style('visibility', typeof row === 'undefined' ? 'hidden' : 'visible')
       .style('top', `${this.yScale(row) + margin.top}px`);
@@ -248,15 +243,20 @@ Col &nbsp; &nbsp; &nbsp; ${col}</br>
 
   draw(nodes) {
     const context = this.canvas.getContext('2d');
-    context.clearRect(0, 0, width, height);
-    nodes.forEach((node) => {
-      context.fillStyle = node.getAttribute('fillStyle');
-      context.fillRect(
-        node.getAttribute('x'),
-        node.getAttribute('y'),
-        node.getAttribute('width') - 1,
-        node.getAttribute('height') - 1,
-      );
-    });
+    const t = d3.timer((elapsed) => {
+      setTimeout(() => {
+        context.clearRect(0, 0, width, height);
+        nodes.forEach((node) => {
+          context.fillStyle = node.getAttribute('fillStyle');
+          context.fillRect(
+            node.getAttribute('x'),
+            node.getAttribute('y'),
+            node.getAttribute('width'),
+            node.getAttribute('height'),
+          );
+        });
+      }, 0);
+      if (elapsed > ANIMATION_DURATION) t.stop();
+    }, 0);
   }
 }
