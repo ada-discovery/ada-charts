@@ -18,7 +18,7 @@
 }
 
 .ac-tooltip {
-    font-size: 1.25rem;
+    font-size: 1.25em;
     position: absolute;
     background: rgba(0,0,0,0.7);
     pointer-events: none;

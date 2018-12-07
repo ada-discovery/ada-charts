@@ -14,10 +14,13 @@ export default {
     if (typeof Chart === 'undefined') {
       throw Error(`Chart type "${chartType}" not implemented.`);
     }
+
     const wrapper = document.createElement('div');
     wrapper.style.position = 'relative';
+    wrapper.style.width = '100%';
     wrapper.classList.add('ada-chart');
     container.appendChild(wrapper);
+
     return new Chart({ container: wrapper });
   },
 };

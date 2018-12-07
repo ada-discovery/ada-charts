@@ -2,37 +2,16 @@ import * as d3 from 'd3';
 import Chart from '../Chart';
 import '../../assets/css/heatmap.css';
 
-const ANIMATION_DURATION = 1000;
-
-
-const W = 1000;
-const H = 1000;
-
-const margin = {
-  top: H / 10,
-  right: 10,
-  bottom: 10,
-  left: W / 10,
-};
-const width = W - margin.left - margin.right;
-const height = H - margin.top - margin.bottom;
-
 export default class extends Chart {
   constructor({ container }) {
     super({ container });
+    this.ANIMATION_DURATION = 1000;
     this.memory = d3.select(document.createElement('memory'));
     this.canvas = d3.select(container)
       .append('canvas')
-      .attr('class', 'ac-canvas')
-      .attr('width', width)
-      .attr('height', height)
-      .style('transform', `translate(${margin.left}px, ${margin.top}px)`)
-      .node();
+      .attr('class', 'ac-canvas');
     this.svg = d3.select(container).append('svg')
-      .attr('width', width + margin.left + margin.right)
-      .attr('height', height + margin.top + margin.bottom)
-      .append('g')
-      .attr('transform', `translate(${margin.left}, ${margin.top})`);
+      .append('g');
     this.vertHL = d3.select(container)
       .append('div')
       .attr('class', 'ac-vert-hl');
@@ -47,6 +26,9 @@ export default class extends Chart {
     this.rows = [];
     this.cols = [];
     this.sequential = true;
+    this.height = 0;
+    this.width = 0;
+    this.margin = {};
   }
 
   static get name() {
@@ -77,13 +59,24 @@ export default class extends Chart {
       this.prepareValues({ values, rows: this.rows, cols: this.cols });
     }
 
+    this.margin = {
+      top: this.containerWidth / 10,
+      right: 10,
+      bottom: 10,
+      left: this.containerWidth / 10,
+    };
+    this.width = this.containerWidth - this.margin.left - this.margin.right;
+    this.height = this.containerWidth - this.margin.top - this.margin.bottom;
+
+    this.container.style['font-size'] = `${this.width / 50}pt`;
+
     this.xScale = d3.scaleBand()
       .domain(this.cols)
-      .range([0, width]);
+      .range([0, this.width]);
 
     this.yScale = d3.scaleBand()
       .domain(this.rows)
-      .range([0, height]);
+      .range([0, this.height]);
 
     let colorScale = null;
     if (this.sequential) {
@@ -94,15 +87,28 @@ export default class extends Chart {
         .domain(this.valueRange);
     }
 
+    this.canvas
+      .attr('width', this.width)
+      .attr('height', this.height)
+      .style('transform', `translate(${this.margin.left}px, ${this.margin.top}px)`);
+
+    d3.select(this.container).select('svg')
+      .attr('width', this.width + this.margin.left + this.margin.right)
+      .attr('height', this.height + this.margin.top + this.margin.bottom);
+
+    this.svg
+      .attr('transform', `translate(${this.margin.left}, ${this.margin.top})`);
+
+
     this.horiHL
-      .style('left', `${margin.left}px`)
-      .style('width', `${width}px`)
+      .style('left', `${this.margin.left}px`)
+      .style('width', `${this.width}px`)
       .style('height', `${this.yScale.bandwidth()}px`);
 
     this.vertHL
-      .style('top', `${margin.top}px`)
+      .style('top', `${this.margin.top}px`)
       .style('width', `${this.xScale.bandwidth()}px`)
-      .style('height', `${height}px`);
+      .style('height', `${this.height}px`);
 
     const rect = this.memory.selectAll('rect')
       .data(this.data, d => `${d.row}-${d.col}`);
@@ -120,7 +126,7 @@ export default class extends Chart {
 
     rect
       .transition()
-      .duration(ANIMATION_DURATION)
+      .duration(this.ANIMATION_DURATION)
       .attr('width', this.xScale.bandwidth())
       .attr('height', this.yScale.bandwidth())
       .attr('x', d => this.xScale(d.col))
@@ -133,16 +139,16 @@ export default class extends Chart {
     rect.exit()
       .remove();
 
-    function wrap() {
-      const self = d3.select(this);
-      let textLength = self.node().getComputedTextLength();
-      let text = self.text();
-      while (textLength > (margin.left) && text.length > 0) {
+    const wrap = (d, i, arr) => {
+      const node = d3.select(arr[i]);
+      let textLength = node.node().getComputedTextLength();
+      let text = node.text();
+      while (textLength > (this.margin.left) && text.length > 0) {
         text = text.slice(0, -1);
-        self.text(`${text}..`);
-        textLength = self.node().getComputedTextLength();
+        node.text(`${text}..`);
+        textLength = node.node().getComputedTextLength();
       }
-    }
+    };
 
     const rowLabels = this.svg.selectAll('text.ac-row-label')
       .data(this.rows, d => d);
@@ -169,7 +175,7 @@ export default class extends Chart {
 
     rowLabels
       .transition()
-      .duration(ANIMATION_DURATION)
+      .duration(this.ANIMATION_DURATION)
       .style('transform', d => `translate(-5px, ${this.yScale(d) + 0.5 * this.yScale.bandwidth()}px)`);
 
     rowLabels.exit()
@@ -200,13 +206,13 @@ export default class extends Chart {
 
     colLabels
       .transition()
-      .duration(ANIMATION_DURATION)
+      .duration(this.ANIMATION_DURATION)
       .style('transform', d => `translate(${this.xScale(d) + 0.5 * this.xScale.bandwidth()}px, -5px)rotate(45deg)`);
 
     colLabels.exit()
       .remove();
 
-    d3.select(this.canvas)
+    this.canvas
       .on('mousemove', (_, i, arr) => {
         const [x, y] = d3.mouse(arr[i]);
 
@@ -229,14 +235,14 @@ export default class extends Chart {
   highlight({ row, col }) {
     this.horiHL
       .style('visibility', typeof row === 'undefined' ? 'hidden' : 'visible')
-      .style('top', `${this.yScale(row) + margin.top}px`);
+      .style('top', `${this.yScale(row) + this.margin.top}px`);
     this.vertHL
       .style('visibility', typeof col === 'undefined' ? 'hidden' : 'visible')
-      .style('left', `${this.xScale(col) + margin.left}px`);
+      .style('left', `${this.xScale(col) + this.margin.left}px`);
     this.tooltip
       .style('visibility', (typeof row === 'undefined' && typeof row === 'undefined') ? 'hidden' : 'visible')
-      .style('left', `${this.xScale(col) + margin.left + this.xScale.bandwidth()}px`)
-      .style('top', `${this.yScale(row) + margin.top + this.yScale.bandwidth()}px`);
+      .style('left', `${this.xScale(col) + this.margin.left + this.xScale.bandwidth()}px`)
+      .style('top', `${this.yScale(row) + this.margin.top + this.yScale.bandwidth()}px`);
 
     if (typeof row !== 'undefined' && typeof col !== 'undefined') {
       // FIXME: this could be made faster by building an index
@@ -260,10 +266,10 @@ Col &nbsp; &nbsp; &nbsp; ${col}</br>
   }
 
   draw(nodes) {
-    const context = this.canvas.getContext('2d');
+    const context = this.canvas.node().getContext('2d');
     const t = d3.timer((elapsed) => {
       setTimeout(() => {
-        context.clearRect(0, 0, width, height);
+        context.clearRect(0, 0, this.width, this.height);
         nodes.forEach((node) => {
           context.fillStyle = node.getAttribute('fillStyle');
           context.fillRect(
@@ -274,7 +280,7 @@ Col &nbsp; &nbsp; &nbsp; ${col}</br>
           );
         });
       }, 0);
-      if (elapsed > ANIMATION_DURATION) t.stop();
+      if (elapsed > this.ANIMATION_DURATION) t.stop();
     }, 0);
   }
 }

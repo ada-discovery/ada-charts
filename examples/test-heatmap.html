@@ -20,6 +20,8 @@
   let values = [];
   let rows = [];
   let cols = [];
+  const randomHeight = Math.floor(Math.random() * (50 - 20 + 1) + 20);
+  const randomWidth = Math.floor(Math.random() * (50 - 20 + 1) + 20);
 
 
   /**
@@ -68,7 +70,7 @@
   }
 
   function update() {
-    generateRandomMatrix(25, 25, -1, 1, true);
+    generateRandomMatrix(randomWidth, randomHeight, -1, 1, true);
     heatmap.update({ values, rows, cols, valueRange: [-1, 1], sequential: true });
   }
 
@@ -78,7 +80,7 @@
     heatmap.highlight({ row: randomRow, col: randomCol });
   }
 
-  update();
+  document.addEventListener('DOMContentLoaded', update, false);
 </script>
 
 <style>
@@ -91,8 +93,9 @@
         display: flex;
         flex-direction: column;
     }
+
     #heatmap-container {
         width: 50vw;
-        height: 50vh;
+        height: 50vw;
     }
 </style>
