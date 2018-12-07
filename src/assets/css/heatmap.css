@@ -10,6 +10,10 @@
     font-weight: bold;
 }
 
+.ac-col-label {
+    font-size: 0.9em;
+}
+
 .ac-vert-hl,.ac-hori-hl {
     background: rgba(255, 255, 255, 0.7);
     position: absolute;
@@ -18,7 +22,8 @@
 }
 
 .ac-tooltip {
-    font-size: 1.25em;
+    white-space: nowrap;
+    font-size: 0.9em;
     position: absolute;
     background: rgba(0,0,0,0.7);
     pointer-events: none;
