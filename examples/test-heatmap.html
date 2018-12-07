@@ -7,8 +7,10 @@
 </head>
 <body>
 <div id="heatmap-controls">
+    <span>API examples:</span>
     <button onclick="update()">update()</button>
     <button onclick="toPNG()">toPNG()</button>
+    <button onclick="highlight()">highlight()</button>
 </div>
 <div id="heatmap-container"></div>
 </body>
@@ -69,6 +71,13 @@
     generateRandomMatrix(25, 25, -1, 1, true);
     heatmap.update({ values, rows, cols, valueRange: [-1, 1], sequential: true });
   }
+
+  function highlight() {
+    const randomRow = rows[Math.floor(Math.random() * rows.length)];
+    const randomCol = cols[Math.floor(Math.random() * cols.length)];
+    heatmap.highlight({ row: randomRow, col: randomCol });
+  }
+
   update();
 </script>
 
