@@ -155,6 +155,7 @@ export default class extends Chart {
       .append('text')
       .attr('class', 'ac-row-label')
       .style('text-anchor', 'end')
+      .style('dominant-baseline', 'middle')
       .style('transform', d => `translate(-5px, ${this.yScale(d) + 0.5 * this.yScale.bandwidth()}px)`)
       .text(d => d)
       .on('click', (row) => {
@@ -186,6 +187,7 @@ export default class extends Chart {
       .append('text')
       .attr('class', 'ac-col-label')
       .style('text-anchor', 'end')
+      .style('dominant-baseline', 'middle')
       .style('transform', d => `translate(${this.xScale(d) + 0.5 * this.xScale.bandwidth()}px, -5px)rotate(45deg)`)
       .text(d => d)
       .on('click', (col) => {
