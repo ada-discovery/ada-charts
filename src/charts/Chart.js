@@ -9,8 +9,17 @@ export default class {
     throw Error('name getter not implemented.');
   }
 
-  update() {
+  render() {
     throw Error('update() not implemented.');
+  }
+
+  resize() {
+    this.container.style['font-size'] = `${this.containerWidth / 50}pt`;
+  }
+
+  update(args) {
+    this.resize();
+    this.render(args);
   }
 
   prepareSVGForCapture() {

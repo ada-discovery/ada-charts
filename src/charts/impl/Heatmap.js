@@ -49,7 +49,7 @@ export default class extends Chart {
     });
   }
 
-  update({ values, valueRange, rows, cols, sequential }) {
+  render({ values, valueRange, rows, cols, sequential }) {
     this.valueRange = typeof valueRange === 'undefined' ? this.valueRange : valueRange;
     this.rows = typeof rows === 'undefined' ? this.rows : rows;
     this.cols = typeof cols === 'undefined' ? this.cols : cols;
@@ -67,8 +67,6 @@ export default class extends Chart {
     };
     this.width = this.containerWidth - this.margin.left - this.margin.right;
     this.height = this.containerWidth - this.margin.top - this.margin.bottom;
-
-    this.container.style['font-size'] = `${this.width / 50}pt`;
 
     this.xScale = d3.scaleBand()
       .domain(this.cols)
@@ -229,7 +227,22 @@ export default class extends Chart {
       .on('mouseleave', () => this.highlight({}));
 
     const nodes = this.memory.selectAll('rect').nodes();
-    this.draw(nodes);
+    const context = this.canvas.node().getContext('2d');
+    const t = d3.timer((elapsed) => {
+      setTimeout(() => {
+        context.clearRect(0, 0, this.width, this.height);
+        nodes.forEach((node) => {
+          context.fillStyle = node.getAttribute('fillStyle');
+          context.fillRect(
+            node.getAttribute('x'),
+            node.getAttribute('y'),
+            node.getAttribute('width'),
+            node.getAttribute('height'),
+          );
+        });
+      }, 0);
+      if (elapsed > this.ANIMATION_DURATION) t.stop();
+    }, 0);
   }
 
   highlight({ row, col }) {
@@ -263,24 +276,5 @@ Col &nbsp; &nbsp; &nbsp; ${col}</br>
       .classed('highlight', false)
       .filter(d => d === col && typeof col !== 'undefined')
       .classed('highlight', true);
-  }
-
-  draw(nodes) {
-    const context = this.canvas.node().getContext('2d');
-    const t = d3.timer((elapsed) => {
-      setTimeout(() => {
-        context.clearRect(0, 0, this.width, this.height);
-        nodes.forEach((node) => {
-          context.fillStyle = node.getAttribute('fillStyle');
-          context.fillRect(
-            node.getAttribute('x'),
-            node.getAttribute('y'),
-            node.getAttribute('width'),
-            node.getAttribute('height'),
-          );
-        });
-      }, 0);
-      if (elapsed > this.ANIMATION_DURATION) t.stop();
-    }, 0);
   }
 }
