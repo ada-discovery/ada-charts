@@ -6,27 +6,40 @@
     <script src="http://localhost:8080/ada-charts.js"></script>
 </head>
 <body>
-<div id="heatmap-container"></div>
+    <div id="heatmap-controls">
+        <button onclick="heatmap.toPNG()">toPNG()</button>
+    </div>
+    <div id="heatmap-container"></div>
 </body>
-
 </html>
 
 <script>
-  const values = [];
-  const rows = [];
-  const cols = [];
-  const min = -1;
-  const max = 1;
-  for (let i = 0; i < 50; i += 1) {
-    rows.push(`row: ${i}`);
-    for (let j = 0; j < 50; j += 1) {
-      values.push(Math.random() * (max - min + 1) + min);
-      if (i === 0) {
-        cols.push(`col: ${j}`);
+  let values = [];
+  let rows = [];
+  let cols = [];
+
+  (function generateRandomMatrix(width, height, minValue, maxValue, undefinedValues) {
+    values = [];
+    rows = [];
+    cols = [];
+    for (let i = 0; i < height; i += 1) {
+      rows.push(`row - ${i}`);
+      for (let j = 0; j < width; j += 1) {
+        if (undefinedValues && Math.random() > 0.9) {
+          values.push(undefined);
+        } else {
+          values.push(Math.random() * (maxValue - minValue + 1) + minValue);
+        }
+        if (i === 0) {
+          cols.push(`col - ${j}`);
+        }
       }
     }
-  }
+  })(20, 20, -1, 1, true);
 
+  /**
+   * API "Documentation" below this point
+   */
   const container = document.querySelector('#heatmap-container');
   const heatmap = AdaCharts.chart({ chartType: 'heatmap', container });
   heatmap.update({
@@ -42,8 +55,17 @@
 </script>
 
 <style>
+    body {
+        display: flex;
+        flex-direction: row;
+    }
+
+    #heatmap-controls {
+        display: flex;
+        flex-direction: column;
+    }
     #heatmap-container {
-        width: 100vw;
-        height: 100vh;
+        width: 50vw;
+        height: 50vh;
     }
 </style>

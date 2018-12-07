@@ -53,6 +53,10 @@ export default class extends Chart {
     return 'heatmap';
   }
 
+  prepareSVGForCapture() {
+    return this.svg;
+  }
+
   prepareValues({ values, rows, cols }) {
     this.data = [];
     rows.forEach((row, i) => {
@@ -109,13 +113,13 @@ export default class extends Chart {
       .attr('height', this.yScale.bandwidth())
       .attr('x', d => this.xScale(d.col))
       .attr('y', d => this.yScale(d.row))
-      .attr('fillStyle', d => colorScale(d.value));
+      .merge(rect)
+      .attr('fillStyle', (d) => {
+        if (typeof d.value === 'undefined') return '#000';
+        return colorScale(d.value);
+      });
 
     rect
-      .attr('fillStyle', (d) => {
-        if (typeof d.value === 'undefined') return 'black';
-        return colorScale(d.value);
-      })
       .transition()
       .duration(ANIMATION_DURATION)
       .attr('width', this.xScale.bandwidth())
@@ -132,7 +136,7 @@ export default class extends Chart {
       let text = self.text();
       while (textLength > (margin.left) && text.length > 0) {
         text = text.slice(0, -1);
-        self.text(`${text}...`);
+        self.text(`${text}..`);
         textLength = self.node().getComputedTextLength();
       }
     }
@@ -149,7 +153,11 @@ export default class extends Chart {
       .on('click', (row) => {
         this.cols = this.data
           .filter(d => d.row === row)
-          .sort((a, b) => b.value - a.value)
+          .sort((a, b) => {
+            if (typeof a.value === 'undefined') return 1;
+            if (typeof b.value === 'undefined') return 0;
+            return b.value - a.value;
+          })
           .map(d => d.col);
         this.update({});
       })
@@ -176,7 +184,11 @@ export default class extends Chart {
       .on('click', (col) => {
         this.rows = this.data
           .filter(d => d.col === col)
-          .sort((a, b) => b.value - a.value)
+          .sort((a, b) => {
+            if (typeof a.value === 'undefined') return 1;
+            if (typeof b.value === 'undefined') return 0;
+            return b.value - a.value;
+          })
           .map(d => d.row);
         this.update({});
       })
