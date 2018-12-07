@@ -6,10 +6,11 @@
     <script src="http://localhost:8080/ada-charts.js"></script>
 </head>
 <body>
-    <div id="heatmap-controls">
-        <button onclick="heatmap.toPNG()">toPNG()</button>
-    </div>
-    <div id="heatmap-container"></div>
+<div id="heatmap-controls">
+    <button onclick="update()">update()</button>
+    <button onclick="toPNG()">toPNG()</button>
+</div>
+<div id="heatmap-container"></div>
 </body>
 </html>
 
@@ -18,14 +19,27 @@
   let rows = [];
   let cols = [];
 
-  (function generateRandomMatrix(width, height, minValue, maxValue, undefinedValues) {
+
+  /**
+   * Ignore the code below. It's just some hacks to generate some random data for demo
+   */
+  function shuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function generateRandomMatrix(width, height, minValue, maxValue, undefinedValues) {
     values = [];
     rows = [];
     cols = [];
+
     for (let i = 0; i < height; i += 1) {
       rows.push(`row - ${i}`);
       for (let j = 0; j < width; j += 1) {
-        if (undefinedValues && Math.random() > 0.9) {
+        if (undefinedValues && Math.random() > 0.8) {
           values.push(undefined);
         } else {
           values.push(Math.random() * (maxValue - minValue + 1) + minValue);
@@ -35,23 +49,27 @@
         }
       }
     }
-  })(20, 20, -1, 1, true);
+
+    if (Math.random() > 0.8) shuffle(rows);
+    if (Math.random() > 0.8) shuffle(cols);
+  }
 
   /**
-   * API "Documentation" below this point
+   * API "documentation" below this point
    */
+
   const container = document.querySelector('#heatmap-container');
   const heatmap = AdaCharts.chart({ chartType: 'heatmap', container });
-  heatmap.update({
-    // values: [1, 0.6997416730183142, -0.29628389941597716, -0.6279173805293008, 0.18412161271303787, -0.35819237583867736, -0.1602431191307706, 0.6997416730183142, 1, -0.4230351005269855, -0.4438241608646983, 0.27089441906720413, -0.4540784161973978, -0.22110543494560858, -0.29628389941597716, -0.4230351005269855, 1, 0.19988596824381763, -0.34487036108378405, 0.3645420902772759, 0.5910901002900717, -0.6279173805293008, -0.4438241608646983, 0.19988596824381763, 1, -0.16746121346398238, 0.22674392710482927, 0.12165768098716498, 0.18412161271303787, 0.27089441906720413, -0.34487036108378405, -0.16746121346398238, 1, -0.41194311422982127, -0.08549287142639136, -0.35819237583867736, -0.4540784161973978, 0.3645420902772759, 0.22674392710482927, -0.41194311422982127, 1, 0.20141771903103936, -0.1602431191307706, -0.22110543494560858, 0.5910901002900717, 0.12165768098716498, -0.08549287142639136, 0.20141771903103936, 1],
-    // rows:  ["MDS UPDRS Total Score (Part I)", "MDS UPDRS Total Score (Part II)", "Sniff Total Score", "PDSS Total Score", "Age at Basic Assessment", "Total Points for MOCA:", "Cerad Total Score"],
-    // cols: ["MDS UPDRS Total Score (Part I)", "MDS UPDRS Total Score (Part II)", "Sniff Total Score", "PDSS Total Score", "Age at Basic Assessment", "Total Points for MOCA:", "Cerad Total Score"],
-    values,
-    rows,
-    cols,
-    valueRange: [-1, 1],
-    sequential: true
-  });
+
+  function toPNG() {
+    heatmap.toPNG();
+  }
+
+  function update() {
+    generateRandomMatrix(25, 25, -1, 1, true);
+    heatmap.update({ values, rows, cols, valueRange: [-1, 1], sequential: true });
+  }
+  update();
 </script>
 
 <style>

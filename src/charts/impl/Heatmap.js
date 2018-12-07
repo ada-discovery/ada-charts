@@ -113,7 +113,6 @@ export default class extends Chart {
       .attr('height', this.yScale.bandwidth())
       .attr('x', d => this.xScale(d.col))
       .attr('y', d => this.yScale(d.row))
-      .merge(rect)
       .attr('fillStyle', (d) => {
         if (typeof d.value === 'undefined') return '#000';
         return colorScale(d.value);
@@ -125,7 +124,11 @@ export default class extends Chart {
       .attr('width', this.xScale.bandwidth())
       .attr('height', this.yScale.bandwidth())
       .attr('x', d => this.xScale(d.col))
-      .attr('y', d => this.yScale(d.row));
+      .attr('y', d => this.yScale(d.row))
+      .attr('fillStyle', (d) => {
+        if (typeof d.value === 'undefined') return '#000';
+        return colorScale(d.value);
+      });
 
     rect.exit()
       .remove();
