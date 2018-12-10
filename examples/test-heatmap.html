@@ -43,7 +43,7 @@
     for (let i = 0; i < height; i += 1) {
       rows.push(`row - ${i}`);
       for (let j = 0; j < width; j += 1) {
-        if (undefinedValues && Math.random() > 0.8) {
+        if (undefinedValues && Math.random() > 0.9) {
           values.push(undefined);
         } else {
           values.push(Math.random() * (maxValue - minValue + 1) + minValue);

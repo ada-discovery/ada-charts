@@ -43,7 +43,7 @@ export default class extends Chart {
     this.data = [];
     rows.forEach((row, i) => {
       cols.forEach((col, j) => {
-        const value = values[i * rows.length + j];
+        const value = values[i * cols.length + j];
         this.data.push({ value, row, col });
       });
     });
@@ -117,10 +117,7 @@ export default class extends Chart {
       .attr('height', this.yScale.bandwidth())
       .attr('x', d => this.xScale(d.col))
       .attr('y', d => this.yScale(d.row))
-      .attr('fillStyle', (d) => {
-        if (typeof d.value === 'undefined') return '#000';
-        return colorScale(d.value);
-      });
+      .attr('fillStyle', d => colorScale(d.value));
 
     rect
       .transition()
@@ -129,10 +126,7 @@ export default class extends Chart {
       .attr('height', this.yScale.bandwidth())
       .attr('x', d => this.xScale(d.col))
       .attr('y', d => this.yScale(d.row))
-      .attr('fillStyle', (d) => {
-        if (typeof d.value === 'undefined') return '#000';
-        return colorScale(d.value);
-      });
+      .attr('fillStyle', d => colorScale(d.value));
 
     rect.exit()
       .remove();
