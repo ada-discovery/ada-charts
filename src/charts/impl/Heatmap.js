@@ -60,10 +60,10 @@ export default class extends Chart {
     }
 
     this.margin = {
-      top: this.containerWidth / 10,
+      top: this.containerWidth / 8,
       right: 10,
       bottom: 10,
-      left: this.containerWidth / 10,
+      left: this.containerWidth / 8,
     };
     this.width = this.containerWidth - this.margin.left - this.margin.right;
     this.height = this.containerWidth - this.margin.top - this.margin.bottom;
@@ -131,16 +131,16 @@ export default class extends Chart {
     rect.exit()
       .remove();
 
-    const wrap = (d, i, arr) => {
-      const node = d3.select(arr[i]);
+    function wrap(selection, maxWidth) {
+      const node = d3.select(selection);
       let textLength = node.node().getComputedTextLength();
       let text = node.text();
-      while (textLength > (this.margin.left) && text.length > 0) {
+      while (textLength > maxWidth && text.length > 0) {
         text = text.slice(0, -1);
         node.text(`${text}..`);
         textLength = node.node().getComputedTextLength();
       }
-    };
+    }
 
     const rowLabels = this.svg.selectAll('text.ac-row-label')
       .data(this.rows, d => d);
@@ -164,7 +164,8 @@ export default class extends Chart {
         this.update({});
       })
       .merge(rowLabels)
-      .each(wrap);
+      .style('font-size', `${this.yScale.bandwidth() > 20 ? 20 : this.yScale.bandwidth()}px`)
+      .each((_, i, arr) => wrap(arr[i], this.margin.left - 5));
 
     rowLabels
       .transition()
@@ -196,7 +197,8 @@ export default class extends Chart {
         this.update({});
       })
       .merge(colLabels)
-      .each(wrap);
+      .style('font-size', `${this.xScale.bandwidth() > 20 ? 20 : this.xScale.bandwidth()}px`)
+      .each((_, i, arr) => wrap(arr[i], this.margin.top));
 
     colLabels
       .transition()

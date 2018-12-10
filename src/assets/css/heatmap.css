@@ -10,8 +10,8 @@
     font-weight: bold;
 }
 
-.ac-col-label {
-    font-size: 0.9em;
+.ac-row-label,.ac-col-label {
+
 }
 
 .ac-vert-hl,.ac-hori-hl {

@@ -20,9 +20,6 @@
   let values = [];
   let rows = [];
   let cols = [];
-  const randomHeight = Math.floor(Math.random() * (50 - 20 + 1) + 20);
-  const randomWidth = Math.floor(Math.random() * (50 - 20 + 1) + 20);
-
 
   /**
    * Ignore the code below. It's just some hacks to generate some random data for demo
@@ -70,6 +67,8 @@
   }
 
   function update() {
+    const randomHeight = Math.floor(Math.random() * (50 - 20 + 1) + 20);
+    const randomWidth = Math.floor(Math.random() * (50 - 20 + 1) + 20);
     generateRandomMatrix(randomWidth, randomHeight, -1, 1, true);
     heatmap.update({ values, rows, cols, valueRange: [-1, 1], sequential: true });
   }
