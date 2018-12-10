@@ -197,7 +197,7 @@ export default class extends Chart {
         this.update({});
       })
       .merge(colLabels)
-      .style('font-size', `${this.xScale.bandwidth() > 20 ? 20 : this.xScale.bandwidth()}px`)
+      .style('font-size', `${(this.xScale.bandwidth() > 20 ? 20 : this.xScale.bandwidth()) - 1}px`)
       .each((_, i, arr) => wrap(arr[i], this.margin.top));
 
     colLabels
