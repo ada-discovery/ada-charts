@@ -32,7 +32,10 @@
     return a;
   }
 
-  function generateRandomMatrix(width, height, minValue, maxValue, undefinedValues) {
+  function generateRandomMatrix(minValue, maxValue) {
+    const height = Math.floor(Math.random() * (50 - 20 + 1) + 20);
+    const width = Math.floor(Math.random() * (50 - 20 + 1) + 20);
+
     values = [];
     rows = [];
     cols = [];
@@ -40,7 +43,7 @@
     for (let i = 0; i < height; i += 1) {
       rows.push(`row - ${i}`);
       for (let j = 0; j < width; j += 1) {
-        if (undefinedValues && Math.random() > 0.9) {
+        if (Math.random() > 0.9) {
           values.push(undefined);
         } else {
           values.push(Math.random() * (maxValue - minValue + 1) + minValue);
@@ -67,9 +70,7 @@
   }
 
   function update() {
-    const randomHeight = Math.floor(Math.random() * (50 - 20 + 1) + 20);
-    const randomWidth = Math.floor(Math.random() * (50 - 20 + 1) + 20);
-    generateRandomMatrix(randomWidth, randomHeight, -1, 1, true);
+    generateRandomMatrix(-1, 1, true);
     heatmap.update({ values, rows, cols, valueRange: [-1, 1], sequential: true });
   }
 
@@ -95,6 +96,5 @@
 
     #heatmap-container {
         width: 50vw;
-        height: 50vw;
     }
 </style>
