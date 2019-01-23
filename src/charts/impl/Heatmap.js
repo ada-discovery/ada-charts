@@ -40,6 +40,8 @@ export default class extends Chart {
     this.tooltipValuePrefix = '';
     this.tooltipRowPrefix = '';
     this.tooltipColPrefix = '';
+    this.xLabel = '';
+    this.yLabel = '';
   }
 
   static get name() {
@@ -82,6 +84,8 @@ export default class extends Chart {
     this.textToChartRatio = typeof textToChartRatio === 'undefined' ? this.textToChartRatio : textToChartRatio;
     this.colLabelPos = typeof colLabelPos === 'undefined' ? this.colLabelPos : colLabelPos;
     this.rowLabelPos = typeof rowLabelPos === 'undefined' ? this.rowLabelPos : rowLabelPos;
+    this.xLabel = typeof xLabel === 'undefined' ? this.xLabel : xLabel;
+    this.yLabel = typeof yLabel === 'undefined' ? this.yLabel : yLabel;
     this.tooltipValuePrefix = typeof tooltipValuePrefix === 'undefined' ? this.tooltipValuePrefix : tooltipValuePrefix;
     this.tooltipRowPrefix = typeof tooltipRowPrefix === 'undefined' ? this.tooltipRowPrefix : tooltipRowPrefix;
     this.tooltipColPrefix = typeof tooltipColPrefix === 'undefined' ? this.tooltipColPrefix : tooltipColPrefix;
@@ -153,7 +157,7 @@ export default class extends Chart {
         return `translate(${this.width / 2}, ${yTrans})`;
       })
       .style('font-size', `${AXIS_LABEL_FONT_SIZE}px`)
-      .text(xLabel);
+      .text(this.xLabel);
 
     this.svg.selectAll('.y-axis-label')
       .remove();
@@ -168,7 +172,7 @@ export default class extends Chart {
         return `translate(${xTrans}, ${this.height / 2})rotate(-90)`;
       })
       .style('font-size', `${AXIS_LABEL_FONT_SIZE}px`)
-      .text(yLabel);
+      .text(this.yLabel);
 
     const rect = this.memory.selectAll('rect')
       .data(this.data, d => `${d.row}-${d.col}`);
