@@ -32,6 +32,8 @@ export default class extends Chart {
     this.cols = [];
     this.sequential = true;
     this.textToChartRatio = 0.2;
+    this.colLabelPos = 'top';
+    this.rowLabelPos = 'left';
     this.height = 0;
     this.width = 0;
     this.margin = {};
@@ -65,6 +67,8 @@ export default class extends Chart {
     cols,
     sequential,
     textToChartRatio,
+    colLabelPos,
+    rowLabelPos,
     xLabel,
     yLabel,
     tooltipValuePrefix,
@@ -76,6 +80,8 @@ export default class extends Chart {
     this.cols = typeof cols === 'undefined' ? this.cols : cols;
     this.sequential = typeof sequential === 'undefined' ? this.sequential : sequential;
     this.textToChartRatio = typeof textToChartRatio === 'undefined' ? this.textToChartRatio : textToChartRatio;
+    this.colLabelPos = typeof colLabelPos === 'undefined' ? this.colLabelPos : colLabelPos;
+    this.rowLabelPos = typeof rowLabelPos === 'undefined' ? this.rowLabelPos : rowLabelPos;
     this.tooltipValuePrefix = typeof tooltipValuePrefix === 'undefined' ? this.tooltipValuePrefix : tooltipValuePrefix;
     this.tooltipRowPrefix = typeof tooltipRowPrefix === 'undefined' ? this.tooltipRowPrefix : tooltipRowPrefix;
     this.tooltipColPrefix = typeof tooltipColPrefix === 'undefined' ? this.tooltipColPrefix : tooltipColPrefix;
@@ -85,11 +91,12 @@ export default class extends Chart {
     }
 
     this.margin = {
-      top: this.containerWidth * textToChartRatio,
-      right: this.containerWidth / 30,
-      bottom: this.containerWidth / 30,
-      left: this.containerWidth * textToChartRatio,
+      top: this.containerWidth * (this.colLabelPos === 'top' ? textToChartRatio : 0),
+      right: this.containerWidth * (this.rowLabelPos === 'right' ? textToChartRatio : 0),
+      bottom: this.containerWidth * (this.colLabelPos === 'bottom' ? textToChartRatio : 0),
+      left: this.containerWidth * (this.rowLabelPos === 'left' ? textToChartRatio : 0),
     };
+
     this.width = this.containerWidth - this.margin.left - this.margin.right;
     this.height = this.containerWidth - this.margin.top - this.margin.bottom;
 
@@ -139,7 +146,12 @@ export default class extends Chart {
       .attr('class', 'x-axis-label axis-label')
       .attr('text-anchor', 'middle')
       .style('dominant-baseline', 'middle')
-      .attr('transform', `translate(${this.width / 2}, ${-this.margin.top + AXIS_LABEL_FONT_SIZE / 2})`)
+      .attr('transform', () => {
+        const yTrans = this.colLabelPos === 'top'
+          ? -this.margin.top + AXIS_LABEL_FONT_SIZE / 2
+          : this.height + this.margin.bottom - AXIS_LABEL_FONT_SIZE / 2;
+        return `translate(${this.width / 2}, ${yTrans})`;
+      })
       .style('font-size', `${AXIS_LABEL_FONT_SIZE}px`)
       .text(xLabel);
 
@@ -149,7 +161,12 @@ export default class extends Chart {
       .attr('class', 'y-axis-label axis-label')
       .attr('text-anchor', 'middle')
       .style('dominant-baseline', 'middle')
-      .attr('transform', `translate(${-this.margin.left + AXIS_LABEL_FONT_SIZE / 2}, ${this.height / 2})rotate(-90)`)
+      .attr('transform', () => {
+        const xTrans = this.rowLabelPos === 'left'
+          ? -this.margin.left + AXIS_LABEL_FONT_SIZE / 2
+          : this.width + this.margin.right - AXIS_LABEL_FONT_SIZE / 2;
+        return `translate(${xTrans}, ${this.height / 2})rotate(-90)`;
+      })
       .style('font-size', `${AXIS_LABEL_FONT_SIZE}px`)
       .text(yLabel);
 
@@ -193,9 +210,12 @@ export default class extends Chart {
     rowLabels.enter()
       .append('text')
       .attr('class', 'ac-row-label')
-      .style('text-anchor', 'end')
+      .style('text-anchor', this.rowLabelPos === 'left' ? 'end' : 'start')
       .style('dominant-baseline', 'middle')
-      .style('transform', d => `translate(${-ROW_COL_LABELS_OFFSET}px, ${this.yScale(d) + 0.5 * this.yScale.bandwidth()}px)`)
+      .style('transform', (d) => {
+        const xTrans = this.rowLabelPos === 'left' ? -ROW_COL_LABELS_OFFSET : this.width + ROW_COL_LABELS_OFFSET;
+        return `translate(${xTrans}px, ${this.yScale(d) + 0.5 * this.yScale.bandwidth()}px)`;
+      })
       .text(d => d)
       .on('click', (row) => {
         this.cols = this.data
@@ -217,7 +237,10 @@ export default class extends Chart {
     rowLabels
       .transition()
       .duration(ANIMATION_DURATION)
-      .style('transform', d => `translate(${-ROW_COL_LABELS_OFFSET}px, ${this.yScale(d) + 0.5 * this.yScale.bandwidth()}px)`);
+      .style('transform', (d) => {
+        const xTrans = this.rowLabelPos === 'left' ? -ROW_COL_LABELS_OFFSET : this.width + ROW_COL_LABELS_OFFSET;
+        return `translate(${xTrans}px, ${this.yScale(d) + 0.5 * this.yScale.bandwidth()}px)`;
+      });
 
     rowLabels.exit()
       .remove();
@@ -228,9 +251,12 @@ export default class extends Chart {
     colLabels.enter()
       .append('text')
       .attr('class', 'ac-col-label')
-      .style('text-anchor', 'end')
+      .style('text-anchor', this.colLabelPos === 'top' ? 'end' : 'start')
       .style('dominant-baseline', 'middle')
-      .style('transform', d => `translate(${this.xScale(d) + 0.5 * this.xScale.bandwidth()}px, -5px)rotate(45deg)`)
+      .style('transform', (d) => {
+        const yTrans = this.colLabelPos === 'top' ? -ROW_COL_LABELS_OFFSET : this.height + ROW_COL_LABELS_OFFSET;
+        return `translate(${this.xScale(d) + 0.5 * this.xScale.bandwidth()}px, ${yTrans}px)rotate(90deg)`;
+      })
       .text(d => d)
       .on('click', (col) => {
         this.rows = this.data
@@ -250,7 +276,10 @@ export default class extends Chart {
     colLabels
       .transition()
       .duration(ANIMATION_DURATION)
-      .style('transform', d => `translate(${this.xScale(d) + 0.5 * this.xScale.bandwidth()}px, -5px)rotate(45deg)`);
+      .style('transform', (d) => {
+        const yTrans = this.colLabelPos === 'top' ? -ROW_COL_LABELS_OFFSET : this.height + ROW_COL_LABELS_OFFSET;
+        return `translate(${this.xScale(d) + 0.5 * this.xScale.bandwidth()}px, ${yTrans}px)rotate(90deg)`;
+      });
 
     colLabels.exit()
       .remove();
