@@ -49,7 +49,7 @@ export default class extends Chart {
     });
   }
 
-  render({ values, valueRange, rows, cols, sequential }) {
+  render({ values, valueRange, rows, cols, sequential, xLabel, yLabel }) {
     this.valueRange = typeof valueRange === 'undefined' ? this.valueRange : valueRange;
     this.rows = typeof rows === 'undefined' ? this.rows : rows;
     this.cols = typeof cols === 'undefined' ? this.cols : cols;
@@ -61,8 +61,8 @@ export default class extends Chart {
 
     this.margin = {
       top: this.containerWidth / 8,
-      right: 10,
-      bottom: 10,
+      right: this.containerWidth / 30,
+      bottom: this.containerWidth / 30,
       left: this.containerWidth / 8,
     };
     this.width = this.containerWidth - this.margin.left - this.margin.right;
@@ -107,6 +107,26 @@ export default class extends Chart {
       .style('top', `${this.margin.top}px`)
       .style('width', `${this.xScale.bandwidth()}px`)
       .style('height', `${this.height}px`);
+
+    this.svg.selectAll('.x-axis-label')
+      .remove();
+    this.svg.append('text')
+      .attr('class', 'x-axis-label axis-label')
+      .attr('text-anchor', 'middle')
+      .style('dominant-baseline', 'middle')
+      .attr('transform', `translate(${this.width / 2}, ${this.height + this.margin.bottom / 2})`)
+      .style('font-size', `${this.margin.bottom}px`)
+      .text(xLabel);
+
+    this.svg.selectAll('.y-axis-label')
+      .remove();
+    this.svg.append('text')
+      .attr('class', 'y-axis-label axis-label')
+      .attr('text-anchor', 'middle')
+      .style('dominant-baseline', 'middle')
+      .attr('transform', `translate(${this.width + this.margin.right / 2}, ${this.height / 2})rotate(-90)`)
+      .style('font-size', `${this.margin.right}px`)
+      .text(yLabel);
 
     const rect = this.memory.selectAll('rect')
       .data(this.data, d => `${d.row}-${d.col}`);

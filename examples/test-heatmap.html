@@ -71,7 +71,15 @@
 
   function update() {
     generateRandomMatrix(-1, 1, true);
-    heatmap.update({ values, rows, cols, valueRange: [-1, 1], sequential: true });
+    heatmap.update({
+      values,
+      rows,
+      cols,
+      valueRange: [-1, 1],
+      sequential: true,
+      xLabel: 'X Axis Label',
+      yLabel: 'Y Axis Label'
+    });
   }
 
   function highlight() {
