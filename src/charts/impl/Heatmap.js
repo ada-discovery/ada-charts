@@ -230,9 +230,7 @@ export default class extends Chart {
       })
       .merge(rowLabels)
       .style('font-size', `${this.yScale.bandwidth() > MAX_FONT_SIZE ? MAX_FONT_SIZE : this.yScale.bandwidth()}px`)
-      .each((_, i, arr) => {
-        wrap(arr[i], this.margin.left - AXIS_LABEL_FONT_SIZE - ROW_COL_LABELS_OFFSET);
-      });
+      .each((_, i, arr) => wrap(arr[i], (this.rowLabelPos === 'left' ? this.margin.left : this.margin.right) - AXIS_LABEL_FONT_SIZE - ROW_COL_LABELS_OFFSET));
 
     rowLabels
       .transition()
@@ -271,7 +269,7 @@ export default class extends Chart {
       })
       .merge(colLabels)
       .style('font-size', `${(this.xScale.bandwidth() > MAX_FONT_SIZE ? MAX_FONT_SIZE : this.xScale.bandwidth()) - 1}px`)
-      .each((_, i, arr) => wrap(arr[i], this.margin.top));
+      .each((_, i, arr) => wrap(arr[i], (this.colLabelPos === 'top' ? this.margin.top : this.margin.bottom) - AXIS_LABEL_FONT_SIZE - ROW_COL_LABELS_OFFSET));
 
     colLabels
       .transition()
