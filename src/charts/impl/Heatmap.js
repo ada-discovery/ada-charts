@@ -254,8 +254,8 @@ export default class extends Chart {
           context.fillRect(
             node.getAttribute('x'),
             node.getAttribute('y'),
-            node.getAttribute('width'),
-            node.getAttribute('height'),
+            node.getAttribute('width') - 1,
+            node.getAttribute('height') - 1,
           );
         });
       }, 0);
