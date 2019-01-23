@@ -2,10 +2,15 @@ import * as d3 from 'd3';
 import Chart from '../Chart';
 import '../../assets/css/heatmap.css';
 
+const ANIMATION_DURATION = 1000;
+const MAX_FONT_SIZE = 20;
+const AXIS_LABEL_FONT_SIZE = MAX_FONT_SIZE;
+const ROW_COL_LABELS_OFFSET = 5;
+
 export default class extends Chart {
   constructor({ container }) {
     super({ container });
-    this.ANIMATION_DURATION = 1000;
+
     this.memory = d3.select(document.createElement('memory'));
     this.canvas = d3.select(container)
       .append('canvas')
@@ -26,6 +31,7 @@ export default class extends Chart {
     this.rows = [];
     this.cols = [];
     this.sequential = true;
+    this.textToChartRatio = 0.2;
     this.height = 0;
     this.width = 0;
     this.margin = {};
@@ -58,6 +64,7 @@ export default class extends Chart {
     rows,
     cols,
     sequential,
+    textToChartRatio,
     xLabel,
     yLabel,
     tooltipValuePrefix,
@@ -68,6 +75,7 @@ export default class extends Chart {
     this.rows = typeof rows === 'undefined' ? this.rows : rows;
     this.cols = typeof cols === 'undefined' ? this.cols : cols;
     this.sequential = typeof sequential === 'undefined' ? this.sequential : sequential;
+    this.textToChartRatio = typeof textToChartRatio === 'undefined' ? this.textToChartRatio : textToChartRatio;
     this.tooltipValuePrefix = typeof tooltipValuePrefix === 'undefined' ? this.tooltipValuePrefix : tooltipValuePrefix;
     this.tooltipRowPrefix = typeof tooltipRowPrefix === 'undefined' ? this.tooltipRowPrefix : tooltipRowPrefix;
     this.tooltipColPrefix = typeof tooltipColPrefix === 'undefined' ? this.tooltipColPrefix : tooltipColPrefix;
@@ -77,10 +85,10 @@ export default class extends Chart {
     }
 
     this.margin = {
-      top: this.containerWidth / 8,
+      top: this.containerWidth * textToChartRatio,
       right: this.containerWidth / 30,
       bottom: this.containerWidth / 30,
-      left: this.containerWidth / 8,
+      left: this.containerWidth * textToChartRatio,
     };
     this.width = this.containerWidth - this.margin.left - this.margin.right;
     this.height = this.containerWidth - this.margin.top - this.margin.bottom;
@@ -131,8 +139,8 @@ export default class extends Chart {
       .attr('class', 'x-axis-label axis-label')
       .attr('text-anchor', 'middle')
       .style('dominant-baseline', 'middle')
-      .attr('transform', `translate(${this.width / 2}, ${this.height + this.margin.bottom / 2})`)
-      .style('font-size', `${this.margin.bottom}px`)
+      .attr('transform', `translate(${this.width / 2}, ${-this.margin.top + AXIS_LABEL_FONT_SIZE / 2})`)
+      .style('font-size', `${AXIS_LABEL_FONT_SIZE}px`)
       .text(xLabel);
 
     this.svg.selectAll('.y-axis-label')
@@ -141,8 +149,8 @@ export default class extends Chart {
       .attr('class', 'y-axis-label axis-label')
       .attr('text-anchor', 'middle')
       .style('dominant-baseline', 'middle')
-      .attr('transform', `translate(${this.width + this.margin.right / 2}, ${this.height / 2})rotate(-90)`)
-      .style('font-size', `${this.margin.right}px`)
+      .attr('transform', `translate(${-this.margin.left + AXIS_LABEL_FONT_SIZE / 2}, ${this.height / 2})rotate(-90)`)
+      .style('font-size', `${AXIS_LABEL_FONT_SIZE}px`)
       .text(yLabel);
 
     const rect = this.memory.selectAll('rect')
@@ -158,7 +166,7 @@ export default class extends Chart {
 
     rect
       .transition()
-      .duration(this.ANIMATION_DURATION)
+      .duration(ANIMATION_DURATION)
       .attr('width', this.xScale.bandwidth())
       .attr('height', this.yScale.bandwidth())
       .attr('x', d => this.xScale(d.col))
@@ -187,7 +195,7 @@ export default class extends Chart {
       .attr('class', 'ac-row-label')
       .style('text-anchor', 'end')
       .style('dominant-baseline', 'middle')
-      .style('transform', d => `translate(-5px, ${this.yScale(d) + 0.5 * this.yScale.bandwidth()}px)`)
+      .style('transform', d => `translate(${-ROW_COL_LABELS_OFFSET}px, ${this.yScale(d) + 0.5 * this.yScale.bandwidth()}px)`)
       .text(d => d)
       .on('click', (row) => {
         this.cols = this.data
@@ -201,13 +209,15 @@ export default class extends Chart {
         this.update({});
       })
       .merge(rowLabels)
-      .style('font-size', `${this.yScale.bandwidth() > 20 ? 20 : this.yScale.bandwidth()}px`)
-      .each((_, i, arr) => wrap(arr[i], this.margin.left - 5));
+      .style('font-size', `${this.yScale.bandwidth() > MAX_FONT_SIZE ? MAX_FONT_SIZE : this.yScale.bandwidth()}px`)
+      .each((_, i, arr) => {
+        wrap(arr[i], this.margin.left - AXIS_LABEL_FONT_SIZE - ROW_COL_LABELS_OFFSET);
+      });
 
     rowLabels
       .transition()
-      .duration(this.ANIMATION_DURATION)
-      .style('transform', d => `translate(-5px, ${this.yScale(d) + 0.5 * this.yScale.bandwidth()}px)`);
+      .duration(ANIMATION_DURATION)
+      .style('transform', d => `translate(${-ROW_COL_LABELS_OFFSET}px, ${this.yScale(d) + 0.5 * this.yScale.bandwidth()}px)`);
 
     rowLabels.exit()
       .remove();
@@ -234,12 +244,12 @@ export default class extends Chart {
         this.update({});
       })
       .merge(colLabels)
-      .style('font-size', `${(this.xScale.bandwidth() > 20 ? 20 : this.xScale.bandwidth()) - 1}px`)
+      .style('font-size', `${(this.xScale.bandwidth() > MAX_FONT_SIZE ? MAX_FONT_SIZE : this.xScale.bandwidth()) - 1}px`)
       .each((_, i, arr) => wrap(arr[i], this.margin.top));
 
     colLabels
       .transition()
-      .duration(this.ANIMATION_DURATION)
+      .duration(ANIMATION_DURATION)
       .style('transform', d => `translate(${this.xScale(d) + 0.5 * this.xScale.bandwidth()}px, -5px)rotate(45deg)`);
 
     colLabels.exit()
@@ -276,7 +286,7 @@ export default class extends Chart {
           );
         });
       }, 0);
-      if (elapsed > this.ANIMATION_DURATION) t.stop();
+      if (elapsed > ANIMATION_DURATION) t.stop();
     }, 0);
   }
 
