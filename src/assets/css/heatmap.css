@@ -23,7 +23,7 @@
 
 .ac-tooltip {
     white-space: nowrap;
-    font-size: 0.9em;
+    font-size: 0.75em;
     position: absolute;
     background: rgba(0,0,0,0.7);
     pointer-events: none;

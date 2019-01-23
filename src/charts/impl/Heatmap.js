@@ -29,6 +29,9 @@ export default class extends Chart {
     this.height = 0;
     this.width = 0;
     this.margin = {};
+    this.tooltipValuePrefix = '';
+    this.tooltipRowPrefix = '';
+    this.tooltipColPrefix = '';
   }
 
   static get name() {
@@ -49,11 +52,25 @@ export default class extends Chart {
     });
   }
 
-  render({ values, valueRange, rows, cols, sequential, xLabel, yLabel }) {
+  render({
+    values,
+    valueRange,
+    rows,
+    cols,
+    sequential,
+    xLabel,
+    yLabel,
+    tooltipValuePrefix,
+    tooltipRowPrefix,
+    tooltipColPrefix,
+  }) {
     this.valueRange = typeof valueRange === 'undefined' ? this.valueRange : valueRange;
     this.rows = typeof rows === 'undefined' ? this.rows : rows;
     this.cols = typeof cols === 'undefined' ? this.cols : cols;
     this.sequential = typeof sequential === 'undefined' ? this.sequential : sequential;
+    this.tooltipValuePrefix = typeof tooltipValuePrefix === 'undefined' ? this.tooltipValuePrefix : tooltipValuePrefix;
+    this.tooltipRowPrefix = typeof tooltipRowPrefix === 'undefined' ? this.tooltipRowPrefix : tooltipRowPrefix;
+    this.tooltipColPrefix = typeof tooltipColPrefix === 'undefined' ? this.tooltipColPrefix : tooltipColPrefix;
 
     if (typeof values !== 'undefined') {
       this.prepareValues({ values, rows: this.rows, cols: this.cols });
@@ -280,9 +297,9 @@ export default class extends Chart {
       const hoveredData = this.memory.selectAll('rect')
         .filter(d => d.row === row && d.col === col).data()[0];
       this.tooltip.html(() => `
-Value &nbsp; ${hoveredData.value}</br>
-Row &nbsp; &nbsp; ${row}</br>
-Col &nbsp; &nbsp; &nbsp; ${col}</br>
+${this.tooltipValuePrefix}${hoveredData.value}</br>
+${this.tooltipRowPrefix}${row}</br>
+${this.tooltipColPrefix}${col}</br>
 `);
     }
 
