@@ -1,10 +1,14 @@
 const webpack = require('webpack');
 const path = require('path');
+const commitHash = require('child_process')
+  .execSync('git rev-parse --short HEAD')
+  .toString()
+  .trim();
 
-module.exports = {
+module.exports = (env, argv) => ({
   entry: './src/index.js',
   output: {
-    filename: 'ada-charts.js',
+    filename: argv.mode === 'development' ? 'ada-charts.js' : `ada-charts-${commitHash}.min.js`,
     path: path.resolve(__dirname, 'lib'),
     library: 'AdaCharts',
     libraryExport: 'default',
@@ -45,4 +49,4 @@ module.exports = {
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
   ],
-};
+});
