@@ -91,10 +91,10 @@ export default class extends Chart {
     }
 
     this.margin = {
-      top: this.containerWidth * (this.colLabelPos === 'top' ? textToChartRatio : 0),
-      right: this.containerWidth * (this.rowLabelPos === 'right' ? textToChartRatio : 0),
-      bottom: this.containerWidth * (this.colLabelPos === 'bottom' ? textToChartRatio : 0),
-      left: this.containerWidth * (this.rowLabelPos === 'left' ? textToChartRatio : 0),
+      top: this.containerWidth * (this.colLabelPos === 'top' ? this.textToChartRatio : 0),
+      right: this.containerWidth * (this.rowLabelPos === 'right' ? this.textToChartRatio : 0),
+      bottom: this.containerWidth * (this.colLabelPos === 'bottom' ? this.textToChartRatio : 0),
+      left: this.containerWidth * (this.rowLabelPos === 'left' ? this.textToChartRatio : 0),
     };
 
     this.width = this.containerWidth - this.margin.left - this.margin.right;
