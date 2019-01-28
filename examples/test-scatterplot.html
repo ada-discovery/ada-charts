@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Scatterplot</title>
+    <script src="http://localhost:8080/ada-charts.js"></script>
+</head>
+<body>
+    <div id="scatterplot-controls">
+        <span>API examples:</span>
+        <button onclick="update()">update()</button>
+        <button onclick="toPNG()">toPNG()</button>
+    </div>
+    <div id="scatterplot-container"></div>
+</body>
+</html>
+
+<script>
+
+  /**
+   * Helper function. Do not copy
+   */
+
+  function generateRandomData(numOfPoints, minValue, maxValue) {
+    const values = [];
+    for (let i = 0; i < numOfPoints; i++) {
+      const x = Math.random() * (maxValue - minValue + 1) + minValue;
+      const y = Math.random() * (maxValue - minValue + 1) + minValue;
+      const z = Math.random() * (maxValue - minValue + 1) + minValue;
+      values.push({ x, y, z });
+    }
+    return values;
+  }
+
+  /**
+   * API Documentation below this point
+   */
+  const container = document.querySelector('#scatterplot-container');
+  const scatterplot = AdaCharts.chart({ chartType: 'scatterplot', container });
+
+  function update() {
+    scatterplot.update({
+      values: generateRandomData(5000, -100, 100),
+    });
+  }
+
+  function toPNG() {
+    scatterplot.toPNG();
+  }
+
+  document.addEventListener('DOMContentLoaded', update, false);
+</script>
+
+<style>
+    body {
+        display: flex;
+        flex-direction: row;
+    }
+
+    #scatterplot-controls {
+        display: flex;
+        flex-direction: column;
+    }
+
+    #scatterplot-container {
+        width: 50vw;
+    }
+</style>
