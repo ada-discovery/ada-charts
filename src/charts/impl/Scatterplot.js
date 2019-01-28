@@ -110,7 +110,7 @@ export default class extends Chart {
 
     this.svg
       .append('g')
-      .attr('class', 'ac-brush')
+      .attr('class', 'ac-scatter-brush')
       .call(brush);
 
     const point = this.memory.selectAll('.ac-scatter-point')
