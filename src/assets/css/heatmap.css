@@ -1,27 +1,27 @@
 @import 'base.css';
 
-.ac-canvas {
+.ac-heatmap-canvas {
     position: absolute;
 }
 
-:hover.ac-row-label,.ac-row-label.highlight,:hover.ac-col-label,.ac-col-label.highlight{
+:hover.ac-heatmap-row-label,.ac-heatmap-row-label.highlight,:hover.ac-heatmap-col-label,.ac-heatmap-col-label.highlight{
     cursor: pointer;
     fill: red;
     font-weight: bold;
 }
 
-.ac-row-label,.ac-col-label {
+.ac-heatmap-row-label,.ac-heatmap-col-label {
 
 }
 
-.ac-vert-hl,.ac-hori-hl {
+.ac-heatmap-vert-hl,.ac-heatmap-hori-hl {
     background: rgba(255, 255, 255, 0.7);
     position: absolute;
     pointer-events: none;
     visibility: hidden;
 }
 
-.ac-tooltip {
+.ac-heatmap-tooltip {
     white-space: nowrap;
     font-size: 0.75em;
     position: absolute;
