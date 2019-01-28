@@ -27,7 +27,7 @@
       const x = Math.random() * (maxValue - minValue + 1) + minValue;
       const y = Math.random() * (maxValue - minValue + 1) + minValue;
       const z = Math.random() * (maxValue - minValue + 1) + minValue;
-      values.push({ x, y, z });
+      values.push([x, y, z]);
     }
     return values;
   }

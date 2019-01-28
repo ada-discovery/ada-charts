@@ -30,15 +30,6 @@ export default class extends Chart {
   }) {
     this.values = typeof values === 'undefined' ? this.values : values;
 
-    const xValues = [];
-    const yValues = [];
-    const zValues = [];
-    this.values.forEach(d => {
-      xValues.push(d.x);
-      yValues.push(d.y);
-      zValues.push(d.z);
-    });
-
     const margin = {
       top: 50,
       right: 50,
@@ -50,12 +41,15 @@ export default class extends Chart {
     const height = this.containerWidth - margin.top - margin.bottom;
 
     const x = d3.scaleLinear()
-      .domain(d3.extent(xValues))
+      .domain(d3.extent(values.map(d => d[0])))
       .range([0, width]);
 
     const y = d3.scaleLinear()
-      .domain(d3.extent(yValues))
+      .domain(d3.extent(values.map(d => d[1])))
       .range([height, 0]);
+
+    const color = d3.scaleSequential(d3.interpolateBlues)
+      .domain(d3.extent(values.map(d => d[2])));
 
     this.canvas
       .attr('width', width)
@@ -88,10 +82,10 @@ export default class extends Chart {
 
     point.enter()
       .append('circle')
-      .attr('dx', d => x(d.x))
-      .attr('dy', d => y(d.y))
+      .attr('dx', d => x(d[0]))
+      .attr('dy', d => y(d[1]))
       .attr('r', Math.ceil(width / 200))
-      .attr('fillStyle', d => '#000');
+      .attr('fillStyle', d => color(d[2]));
 
     point.exit()
       .remove();
@@ -104,9 +98,6 @@ export default class extends Chart {
       context.arc(node.getAttribute('dx'), node.getAttribute('dy'), node.getAttribute('r'), 0, 2 * Math.PI, false);
       context.fillStyle = node.getAttribute('fillStyle');
       context.fill();
-      context.strokeStyle = context.fillStyle;
-      context.lineWidth = 1;
-      context.stroke();
     });
   }
 }
