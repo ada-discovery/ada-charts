@@ -40,13 +40,15 @@ export default class extends Chart {
     const width = this.containerWidth - margin.left - margin.right;
     const height = this.containerWidth - margin.top - margin.bottom;
 
+    const padding = width / 40;
+
     const x = d3.scaleLinear()
       .domain(d3.extent(values.map(d => d[0])))
-      .range([0, width]);
+      .range([padding, width - padding]);
 
     const y = d3.scaleLinear()
       .domain(d3.extent(values.map(d => d[1])))
-      .range([height, 0]);
+      .range([height - padding, padding]);
 
     const color = d3.scaleSequential(d3.interpolateBlues)
       .domain(d3.extent(values.map(d => d[2])));
@@ -63,19 +65,37 @@ export default class extends Chart {
     this.svg
       .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
-    const xAxis = d3.axisBottom(x);
-    const yAxis = d3.axisLeft(y);
+    const xAxisBottom = d3.axisBottom(x);
+    const xAxisTop = d3.axisBottom(x)
+      .tickSizeInner(height)
+      .tickFormat('');
+
+    const yAxisLeft = d3.axisLeft(y);
+    const yAxisRight = d3.axisLeft(y)
+      .tickSizeInner(width)
+      .tickFormat('');
 
     this.svg
       .append('g')
       .attr('class', 'ac-scatter-x-axis ac-scatter-axis')
       .attr('transform', `translate(0, ${height})`)
-      .call(xAxis);
+      .call(xAxisBottom);
+
+    this.svg
+      .append('g')
+      .attr('class', 'ac-scatter-x-axis ac-scatter-axis')
+      .call(xAxisTop);
 
     this.svg
       .append('g')
       .attr('class', 'ac-scatter-y-axis ac-scatter-axis')
-      .call(yAxis);
+      .call(yAxisLeft);
+
+    this.svg
+      .append('g')
+      .attr('class', 'ac-scatter-y-axis ac-scatter-axis')
+      .attr('transform', `translate(${width}, 0)`)
+      .call(yAxisRight);
 
     const point = this.memory.selectAll('.ac-scatter-point')
       .data(values);

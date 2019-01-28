@@ -3,3 +3,23 @@
 .ac-scatter-canvas {
     position: absolute;
 }
+
+.ac-scatter-axis {
+    shape-rendering: crispEdges;
+}
+
+.ac-scatter-axis .tick {
+    shape-rendering: crispEdges;
+}
+
+.ac-scatter-axis path {
+    stroke: none;
+}
+
+.ac-scatter-axis .tick line {
+    stroke: #c4c4c4;
+}
+
+.ac-scatter-axis .tick text {
+    font-size: 1em;
+}
