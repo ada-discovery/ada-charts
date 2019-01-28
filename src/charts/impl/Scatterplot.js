@@ -49,11 +49,11 @@ export default class extends Chart {
     const width = this.containerWidth - margin.left - margin.right;
     const height = this.containerWidth - margin.top - margin.bottom;
 
-    const xScale = d3.scaleLinear()
+    const x = d3.scaleLinear()
       .domain(d3.extent(xValues))
       .range([0, width]);
 
-    const yScale = d3.scaleLinear()
+    const y = d3.scaleLinear()
       .domain(d3.extent(yValues))
       .range([height, 0]);
 
@@ -69,8 +69,8 @@ export default class extends Chart {
     this.svg
       .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
-    const xAxis = d3.axisBottom(xScale);
-    const yAxis = d3.axisLeft(yScale);
+    const xAxis = d3.axisBottom(x);
+    const yAxis = d3.axisLeft(y);
 
     this.svg
       .append('g')
@@ -82,5 +82,31 @@ export default class extends Chart {
       .append('g')
       .attr('class', 'ac-scatter-y-axis ac-scatter-axis')
       .call(yAxis);
+
+    const point = this.memory.selectAll('.ac-scatter-point')
+      .data(values);
+
+    point.enter()
+      .append('circle')
+      .attr('dx', d => x(d.x))
+      .attr('dy', d => y(d.y))
+      .attr('r', Math.ceil(width / 200))
+      .attr('fillStyle', d => '#000');
+
+    point.exit()
+      .remove();
+
+    const nodes = this.memory.selectAll('circle').nodes();
+    const context = this.canvas.node().getContext('2d');
+    context.clearRect(0, 0, width, height);
+    nodes.forEach((node) => {
+      context.beginPath();
+      context.arc(node.getAttribute('dx'), node.getAttribute('dy'), node.getAttribute('r'), 0, 2 * Math.PI, false);
+      context.fillStyle = node.getAttribute('fillStyle');
+      context.fill();
+      context.strokeStyle = context.fillStyle;
+      context.lineWidth = 1;
+      context.stroke();
+    });
   }
 }
