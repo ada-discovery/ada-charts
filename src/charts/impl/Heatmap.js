@@ -14,18 +14,18 @@ export default class extends Chart {
     this.memory = d3.select(document.createElement('memory'));
     this.canvas = d3.select(container)
       .append('canvas')
-      .attr('class', 'ac-canvas');
+      .attr('class', 'ac-heatmap-canvas');
     this.svg = d3.select(container).append('svg')
       .append('g');
     this.vertHL = d3.select(container)
       .append('div')
-      .attr('class', 'ac-vert-hl');
+      .attr('class', 'ac-heatmap-vert-hl');
     this.horiHL = d3.select(container)
       .append('div')
-      .attr('class', 'ac-hori-hl');
+      .attr('class', 'ac-heatmap-hori-hl');
     this.tooltip = d3.select(container)
       .append('div')
-      .attr('class', 'ac-tooltip');
+      .attr('class', 'ac-heatmap-tooltip');
     this.data = [];
     this.valueRange = [];
     this.rows = [];
@@ -208,12 +208,12 @@ export default class extends Chart {
       }
     }
 
-    const rowLabels = this.svg.selectAll('text.ac-row-label')
+    const rowLabels = this.svg.selectAll('text.ac-heatmap-row-label')
       .data(this.rows, d => d);
 
     rowLabels.enter()
       .append('text')
-      .attr('class', 'ac-row-label')
+      .attr('class', 'ac-heatmap-row-label')
       .style('text-anchor', this.rowLabelPos === 'left' ? 'end' : 'start')
       .style('dominant-baseline', 'middle')
       .style('transform', (d) => {
@@ -247,12 +247,12 @@ export default class extends Chart {
     rowLabels.exit()
       .remove();
 
-    const colLabels = this.svg.selectAll('text.ac-col-label')
+    const colLabels = this.svg.selectAll('text.ac-heatmap-col-label')
       .data(this.cols, d => d);
 
     colLabels.enter()
       .append('text')
-      .attr('class', 'ac-col-label')
+      .attr('class', 'ac-heatmap-col-label')
       .style('text-anchor', this.colLabelPos === 'top' ? 'end' : 'start')
       .style('dominant-baseline', 'middle')
       .style('transform', (d) => {
@@ -344,11 +344,11 @@ ${this.tooltipColPrefix}${col}</br>
 `);
     }
 
-    this.svg.selectAll('text.ac-row-label')
+    this.svg.selectAll('text.ac-heatmap-row-label')
       .classed('highlight', false)
       .filter(d => d === row && typeof row !== 'undefined')
       .classed('highlight', true);
-    this.svg.selectAll('text.ac-col-label')
+    this.svg.selectAll('text.ac-heatmap-col-label')
       .classed('highlight', false)
       .filter(d => d === col && typeof col !== 'undefined')
       .classed('highlight', true);
