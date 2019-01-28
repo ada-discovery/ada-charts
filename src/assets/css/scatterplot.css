@@ -4,6 +4,10 @@
     position: absolute;
 }
 
+.ac-scatter-svg {
+    position: relative;
+}
+
 .ac-scatter-axis {
     shape-rendering: crispEdges;
 }

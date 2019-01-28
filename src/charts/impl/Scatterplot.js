@@ -12,6 +12,7 @@ export default class extends Chart {
       .attr('class', 'ac-scatter-canvas');
     this.svg = d3.select(container)
       .append('svg')
+      .attr('class', 'ac-scatter-svg')
       .append('g');
 
     this.values = [];
@@ -27,8 +28,10 @@ export default class extends Chart {
 
   render({
     values,
+    callback,
   }) {
     this.values = typeof values === 'undefined' ? this.values : values;
+    this.callback = typeof callback === 'undefined' ? this.callback : callback;
 
     const margin = {
       top: 50,
@@ -96,6 +99,19 @@ export default class extends Chart {
       .attr('class', 'ac-scatter-y-axis ac-scatter-axis')
       .attr('transform', `translate(${width}, 0)`)
       .call(yAxisRight);
+
+    const brush = d3.brush()
+      .extent([[0, 0], [width, height]])
+      .on('end', () => {
+        if (!d3.event.sourceEvent) return;
+        const [[x0, y0], [x1, y1]] = d3.event.selection;
+        this.callback([[x.invert(x0), y.invert(y0)], [x.invert(x1), y.invert(y1)]]);
+      });
+
+    this.svg
+      .append('g')
+      .attr('class', 'ac-brush')
+      .call(brush);
 
     const point = this.memory.selectAll('.ac-scatter-point')
       .data(values);
