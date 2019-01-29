@@ -26,7 +26,7 @@
     for (let i = 0; i < numOfPoints; i++) {
       const x = Math.random() * (maxValue - minValue + 1) + minValue;
       const y = Math.random() * (maxValue - minValue + 1) + minValue;
-      const z = Math.random() * (maxValue - minValue + 1) + minValue;
+      const z = Math.random() < 0.33 ? 0 : Math.random() > 0.66 ? 1 : 2;
       values.push([x, y, z]);
     }
     return values;
@@ -41,6 +41,7 @@
   function update() {
     scatterplot.update({
       values: generateRandomData(1000, -100, 100),
+      categories: { name: 'Gender', 0: 'male', 1: 'female', 2: 'N/A'},
       callback: d => console.log(d),
     });
   }

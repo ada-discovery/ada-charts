@@ -18,8 +18,12 @@ export default class extends Chart {
     this.tooltip = d3.select(container)
       .append('div')
       .attr('class', 'ac-scatter-tooltip');
+    this.legend = this.svg
+      .append('g')
+      .attr('class', 'ac-scatter-legend');
 
     this.values = [];
+    this.categories = {};
     this.callback = () => {};
     this.colorToTooltipMap = {};
   }
@@ -34,9 +38,11 @@ export default class extends Chart {
 
   render({
     values,
+    categories,
     callback,
   }) {
     this.values = typeof values === 'undefined' ? this.values : values;
+    this.categories = typeof categories === 'undefined' ? this.categories : categories;
     this.callback = typeof callback === 'undefined' ? this.callback : callback;
 
     const margin = {
@@ -61,8 +67,15 @@ export default class extends Chart {
       .domain(d3.extent(values.map(d => d[1])))
       .range([height - padding, padding]);
 
-    const color = d3.scaleSequential(d3.interpolateBlues)
-      .domain(d3.extent(values.map(d => d[2])));
+    let color;
+    if (typeof this.categories.name === 'undefined') {
+      color = d3.scaleSequential(d3.interpolateBlues)
+        .domain(d3.extent(values.map(d => d[2])));
+    } else {
+      color = d3.scaleOrdinal()
+        .domain(Object.keys(this.categories).filter(d => d !== 'name'))
+        .range(d3.schemeSet2);
+    }
 
     this.canvas
       .attr('width', width)
@@ -158,10 +171,31 @@ export default class extends Chart {
       .attr('title', d => `
 ${d[0]}</br>
 ${d[1]}</br>
-${d[2]}</br>
+${typeof this.categories.name === 'undefined' ? d[2] : this.categories[d[2]]}</br>
 `);
 
     point.exit()
+      .remove();
+
+    const legendElementHeight = height / 20;
+    const legendElementWidth = width / 20;
+
+    this.legend
+      .attr('transform', `translate(${width - legendElementWidth}, ${legendElementHeight})`);
+
+    const legendElement = this.legend.selectAll('.ac-scatter-legend-element')
+      .data(Object.keys(this.categories).filter(d => d !== 'name'));
+
+    legendElement.enter()
+      .append('g')
+      .attr('class', 'ac-scatter-legend-element')
+      .append('rect')
+      .attr('y', (_, i) => legendElementHeight * i)
+      .attr('height', legendElementHeight)
+      .attr('width', legendElementWidth)
+      .attr('fill', d => color(d));
+
+    legendElement.exit()
       .remove();
 
     const nodes = this.memory.selectAll('circle').nodes();
