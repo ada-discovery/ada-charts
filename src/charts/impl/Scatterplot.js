@@ -10,9 +10,7 @@ export default class extends Chart {
     this.canvas = d3.select(container)
       .append('canvas')
       .attr('class', 'ac-scatter-canvas');
-    this.hiddenCanvas = d3.select(container)
-      .append('canvas')
-      .attr('class', 'ac-scatter-canvas ac-scatter-invisible-canvas');
+    this.hiddenCanvas = document.createElement('canvas');
     this.svg = d3.select(container)
       .append('svg')
       .attr('class', 'ac-scatter-svg')
@@ -71,10 +69,8 @@ export default class extends Chart {
       .attr('height', height)
       .style('transform', `translate(${margin.left}px, ${margin.top}px)`);
 
-    this.hiddenCanvas
-      .attr('width', width)
-      .attr('height', height)
-      .style('transform', `translate(${margin.left}px, ${margin.top}px)`);
+    this.hiddenCanvas.width = width;
+    this.hiddenCanvas.height = height;
 
     d3.select(this.container).select('svg')
       .attr('width', width + margin.left + margin.right)
@@ -131,7 +127,7 @@ export default class extends Chart {
     this.svg
       .on('mousemove', (d, i, nodes) => {
         const [xPos, yPos] = d3.mouse(nodes[i]);
-        const ctx = this.hiddenCanvas.node().getContext('2d');
+        const ctx = this.hiddenCanvas.getContext('2d');
         const [r, g, b] = ctx.getImageData(xPos, yPos, 1, 1).data;
         const tooltip = this.colorToTooltipMap[`${r}:${g}:${b}`];
         if (typeof tooltip === 'undefined') {
@@ -170,7 +166,7 @@ ${d[2]}</br>
 
     const nodes = this.memory.selectAll('circle').nodes();
     const ctx = this.canvas.node().getContext('2d');
-    const hiddenCtx = this.hiddenCanvas.node().getContext('2d');
+    const hiddenCtx = this.hiddenCanvas.getContext('2d');
     this.colorToTooltipMap = {};
     ctx.clearRect(0, 0, width, height);
     hiddenCtx.clearRect(0, 0, width, height);
