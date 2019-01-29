@@ -17,6 +17,9 @@ export default class extends Chart {
       .append('svg')
       .attr('class', 'ac-scatter-svg')
       .append('g');
+    this.tooltip = d3.select(container)
+      .append('div')
+      .attr('class', 'ac-scatter-tooltip');
 
     this.values = [];
     this.callback = () => {};
@@ -32,9 +35,9 @@ export default class extends Chart {
   }
 
   render({
-    values,
-    callback,
-  }) {
+           values,
+           callback,
+         }) {
     this.values = typeof values === 'undefined' ? this.values : values;
     this.callback = typeof callback === 'undefined' ? this.callback : callback;
 
@@ -123,14 +126,27 @@ export default class extends Chart {
       .attr('class', 'ac-scatter-brush')
       .call(brush);
 
-    this.svg.on('mousemove', (d, i, nodes) => {
-      const [xPos, yPos] = d3.mouse(nodes[i]);
-      const ctx = this.hiddenCanvas.node().getContext('2d');
-      const [r, g, b] = ctx.getImageData(xPos, yPos, 1, 1).data;
-      const tooltip = this.colorToTooltipMap[`${r}:${g}:${b}`];
-      if (typeof tooltip === 'undefined') return;  // background color
-
-    });
+    this.svg
+      .on('mousemove', (d, i, nodes) => {
+        const [xPos, yPos] = d3.mouse(nodes[i]);
+        const ctx = this.hiddenCanvas.node().getContext('2d');
+        const [r, g, b] = ctx.getImageData(xPos, yPos, 1, 1).data;
+        const tooltip = this.colorToTooltipMap[`${r}:${g}:${b}`];
+        if (typeof tooltip === 'undefined') {
+          this.tooltip
+            .style('visibility', 'hidden');
+        } else {
+          this.tooltip
+            .style('left', `${x}px`)
+            .style('top', `${y}px`)
+            .style('visibility', 'visible')
+            .html(tooltip);
+        }
+      })
+      .on('mouseleave', () => {
+        this.tooltip
+          .style('visibility', 'hidden');
+      });
 
     const point = this.memory.selectAll('.ac-scatter-point')
       .data(values);

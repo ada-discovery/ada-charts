@@ -39,3 +39,14 @@
 .ac-scatter-axis .tick text {
     font-size: 1.5em;
 }
+
+.ac-scatter-tooltip {
+    white-space: nowrap;
+    font-size: 0.75em;
+    position: absolute;
+    background: rgba(0,0,0,0.7);
+    pointer-events: none;
+    color: white;
+    padding: 0.5vh;
+    visibility: hidden;
+}
