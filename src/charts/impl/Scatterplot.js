@@ -10,6 +10,9 @@ export default class extends Chart {
     this.canvas = d3.select(container)
       .append('canvas')
       .attr('class', 'ac-scatter-canvas');
+    this.hiddenCanvas = d3.select(container)
+      .append('canvas')
+      .attr('class', 'ac-scatter-canvas ac-scatter-invisible-canvas');
     this.svg = d3.select(container)
       .append('svg')
       .attr('class', 'ac-scatter-svg')
@@ -61,6 +64,11 @@ export default class extends Chart {
       .attr('height', height)
       .style('transform', `translate(${margin.left}px, ${margin.top}px)`);
 
+    this.hiddenCanvas
+      .attr('width', width)
+      .attr('height', height)
+      .style('transform', `translate(${margin.left}px, ${margin.top}px)`);
+
     d3.select(this.container).select('svg')
       .attr('width', width + margin.left + margin.right)
       .attr('height', height + margin.top + margin.bottom);
@@ -103,7 +111,7 @@ export default class extends Chart {
     const brush = d3.brush()
       .extent([[0, 0], [width, height]])
       .on('end', () => {
-        if (!d3.event.sourceEvent) return;
+        if (!d3.event.sourceEvent || !d3.event.selection) return;
         const [[x0, y0], [x1, y1]] = d3.event.selection;
         this.callback([[x.invert(x0), y.invert(y0)], [x.invert(x1), y.invert(y1)]]);
       });
@@ -112,6 +120,11 @@ export default class extends Chart {
       .append('g')
       .attr('class', 'ac-scatter-brush')
       .call(brush);
+
+    this.svg.on('mousemove', function () {
+      const [xPos, yPos] = d3.mouse(this);
+      this.hiddenCanvas
+    });
 
     const point = this.memory.selectAll('.ac-scatter-point')
       .data(values);
@@ -127,13 +140,41 @@ export default class extends Chart {
       .remove();
 
     const nodes = this.memory.selectAll('circle').nodes();
-    const context = this.canvas.node().getContext('2d');
-    context.clearRect(0, 0, width, height);
-    nodes.forEach((node) => {
-      context.beginPath();
-      context.arc(node.getAttribute('dx'), node.getAttribute('dy'), node.getAttribute('r'), 0, 2 * Math.PI, false);
-      context.fillStyle = node.getAttribute('fillStyle');
-      context.fill();
+    const ctx = this.canvas.node().getContext('2d');
+    const hiddenCtx = this.hiddenCanvas.node().getContext('2d');
+
+    ctx.clearRect(0, 0, width, height);
+    hiddenCtx.clearRect(0, 0, width, height);
+    nodes.forEach((node, i) => {
+      // draw visible point
+      ctx.beginPath();
+      ctx.arc(
+        node.getAttribute('dx'),
+        node.getAttribute('dy'),
+        node.getAttribute('r'),
+        0,
+        2 * Math.PI,
+        false,
+      );
+      ctx.fillStyle = node.getAttribute('fillStyle');
+      ctx.fill();
+
+      // draw invisible square with unique color
+      // eslint-disable-next-line no-bitwise
+      const r = i >> 16;
+      // eslint-disable-next-line no-bitwise
+      const g = i - (r << 16) >> 8;
+      // eslint-disable-next-line no-bitwise
+      const b = i - (r << 16) - (g << 8);
+      hiddenCtx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+      hiddenCtx.fillRect(
+        parseInt(node.getAttribute('dx') - node.getAttribute('r'), 10),
+        parseInt(node.getAttribute('dy') - node.getAttribute('r'), 10),
+        Math.ceil(node.getAttribute('r') * 2 + 0.5),
+        Math.ceil(node.getAttribute('r') * 2 + 0.5),
+      );
     });
+
+
   }
 }

@@ -2,6 +2,14 @@
 
 .ac-scatter-canvas {
     position: absolute;
+    /*image-rendering: -moz-crisp-edges;*/
+    /*image-rendering: -webkit-crisp-edges;*/
+    /*image-rendering: pixelated;*/
+    /*image-rendering: crisp-edges;*/
+}
+
+.ac-scatter-invisible-canvas {
+
 }
 
 .ac-scatter-svg {
@@ -29,5 +37,5 @@
 }
 
 .ac-scatter-axis .tick text {
-    font-size: 1em;
+    font-size: 1.5em;
 }
