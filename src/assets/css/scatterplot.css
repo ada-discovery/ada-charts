@@ -9,7 +9,7 @@
 }
 
 .ac-scatter-invisible-canvas {
-
+    visibility: hidden;
 }
 
 .ac-scatter-svg {

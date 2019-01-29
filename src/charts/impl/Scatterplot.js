@@ -19,6 +19,8 @@ export default class extends Chart {
       .append('g');
 
     this.values = [];
+    this.callback = () => {};
+    this.colorToTooltipMap = {};
   }
 
   static get name() {
@@ -121,9 +123,13 @@ export default class extends Chart {
       .attr('class', 'ac-scatter-brush')
       .call(brush);
 
-    this.svg.on('mousemove', function () {
-      const [xPos, yPos] = d3.mouse(this);
-      this.hiddenCanvas
+    this.svg.on('mousemove', (d, i, nodes) => {
+      const [xPos, yPos] = d3.mouse(nodes[i]);
+      const ctx = this.hiddenCanvas.node().getContext('2d');
+      const [r, g, b] = ctx.getImageData(xPos, yPos, 1, 1).data;
+      const tooltip = this.colorToTooltipMap[`${r}:${g}:${b}`];
+      if (typeof tooltip === 'undefined') return;  // background color
+
     });
 
     const point = this.memory.selectAll('.ac-scatter-point')
@@ -134,7 +140,12 @@ export default class extends Chart {
       .attr('dx', d => x(d[0]))
       .attr('dy', d => y(d[1]))
       .attr('r', Math.ceil(width / 200))
-      .attr('fillStyle', d => color(d[2]));
+      .attr('fillStyle', d => color(d[2]))
+      .attr('title', d => `
+${d[0]}</br>
+${d[1]}</br>
+${d[2]}</br>
+`);
 
     point.exit()
       .remove();
@@ -142,7 +153,7 @@ export default class extends Chart {
     const nodes = this.memory.selectAll('circle').nodes();
     const ctx = this.canvas.node().getContext('2d');
     const hiddenCtx = this.hiddenCanvas.node().getContext('2d');
-
+    this.colorToTooltipMap = {};
     ctx.clearRect(0, 0, width, height);
     hiddenCtx.clearRect(0, 0, width, height);
     nodes.forEach((node, i) => {
@@ -160,12 +171,14 @@ export default class extends Chart {
       ctx.fill();
 
       // draw invisible square with unique color
+      const colorCode = i + 1;
       // eslint-disable-next-line no-bitwise
-      const r = i >> 16;
+      const r = colorCode >> 16;
       // eslint-disable-next-line no-bitwise
-      const g = i - (r << 16) >> 8;
+      const g = colorCode - (r << 16) >> 8;
       // eslint-disable-next-line no-bitwise
-      const b = i - (r << 16) - (g << 8);
+      const b = colorCode - (r << 16) - (g << 8);
+      this.colorToTooltipMap[`${r}:${g}:${b}`] = node.getAttribute('title');
       hiddenCtx.fillStyle = `rgb(${r}, ${g}, ${b})`;
       hiddenCtx.fillRect(
         parseInt(node.getAttribute('dx') - node.getAttribute('r'), 10),
