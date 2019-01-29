@@ -35,9 +35,9 @@ export default class extends Chart {
   }
 
   render({
-           values,
-           callback,
-         }) {
+    values,
+    callback,
+  }) {
     this.values = typeof values === 'undefined' ? this.values : values;
     this.callback = typeof callback === 'undefined' ? this.callback : callback;
 
@@ -50,6 +50,8 @@ export default class extends Chart {
 
     const width = this.containerWidth - margin.left - margin.right;
     const height = this.containerWidth - margin.top - margin.bottom;
+
+    const tooltipOffset = width / 100;
 
     const padding = width / 40;
 
@@ -137,8 +139,8 @@ export default class extends Chart {
             .style('visibility', 'hidden');
         } else {
           this.tooltip
-            .style('left', `${x}px`)
-            .style('top', `${y}px`)
+            .style('left', `${xPos + margin.left + tooltipOffset}px`)
+            .style('top', `${yPos + margin.top + tooltipOffset}px`)
             .style('visibility', 'visible')
             .html(tooltip);
         }
@@ -203,7 +205,5 @@ ${d[2]}</br>
         Math.ceil(node.getAttribute('r') * 2 + 0.5),
       );
     });
-
-
   }
 }
