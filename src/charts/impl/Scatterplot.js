@@ -35,9 +35,15 @@ export default class extends Chart {
       .append('g')
       .attr('class', 'ac-scatter-y-axis ac-scatter-axis');
 
+    this.brush = this.svg
+      .append('g')
+      .attr('class', 'ac-scatter-brush');
+
     this.legend = this.svg
       .append('g')
       .attr('class', 'ac-scatter-legend');
+    this.legend
+      .append('rect');
 
     this.values = [];
     this.categories = {};
@@ -57,6 +63,7 @@ export default class extends Chart {
     values,
     categories,
     callback,
+    _selectedCategory,
   }) {
     this.values = typeof values === 'undefined' ? this.values : values;
     this.categories = typeof categories === 'undefined' ? this.categories : categories;
@@ -77,17 +84,17 @@ export default class extends Chart {
     const padding = width / 40;
 
     const x = d3.scaleLinear()
-      .domain(d3.extent(values.map(d => d[0])))
+      .domain(d3.extent(this.values.map(d => d[0])))
       .range([padding, width - padding]);
 
     const y = d3.scaleLinear()
-      .domain(d3.extent(values.map(d => d[1])))
+      .domain(d3.extent(this.values.map(d => d[1])))
       .range([height - padding, padding]);
 
     let color;
     if (typeof this.categories.name === 'undefined') {
       color = d3.scaleSequential(d3.interpolateBlues)
-        .domain(d3.extent(values.map(d => d[2])));
+        .domain(d3.extent(this.values.map(d => d[2])));
     } else {
       color = d3.scaleOrdinal()
         .domain(Object.keys(this.categories).filter(d => d !== 'name'))
@@ -106,8 +113,7 @@ export default class extends Chart {
       .attr('width', width + margin.left + margin.right)
       .attr('height', height + margin.top + margin.bottom);
 
-    this.svg
-      .attr('transform', `translate(${margin.left}, ${margin.top})`);
+    this.svg.attr('transform', `translate(${margin.left}, ${margin.top})`);
 
     const xAxisBottom = d3.axisBottom(x);
     const xAxisTop = d3.axisBottom(x)
@@ -141,9 +147,7 @@ export default class extends Chart {
         this.callback([[x.invert(x0), y.invert(y0)], [x.invert(x1), y.invert(y1)]]);
       });
 
-    this.svg
-      .append('g')
-      .attr('class', 'ac-scatter-brush')
+    this.brush
       .call(brush);
 
     this.svg
@@ -153,8 +157,7 @@ export default class extends Chart {
         const [r, g, b] = ctx.getImageData(xPos, yPos, 1, 1).data;
         const tooltip = this.colorToTooltipMap[`${r}:${g}:${b}`];
         if (typeof tooltip === 'undefined') {
-          this.tooltip
-            .style('visibility', 'hidden');
+          this.tooltip.style('visibility', 'hidden');
         } else {
           this.tooltip
             .style('left', `${xPos + margin.left + tooltipOffset}px`)
@@ -164,17 +167,17 @@ export default class extends Chart {
         }
       })
       .on('mouseleave', () => {
-        this.tooltip
-          .style('visibility', 'hidden');
+        this.tooltip.style('visibility', 'hidden');
       });
 
     const point = this.memory.selectAll('.ac-scatter-point')
-      .data(values);
+      .data(this.values);
 
     point.enter()
       .append('circle')
       .attr('dx', d => x(d[0]))
       .attr('dy', d => y(d[1]))
+      .attr('data-z', d => d[2])
       .attr('r', Math.ceil(width / 200))
       .attr('fillStyle', d => color(d[2]))
       .attr('title', d => `
@@ -219,39 +222,44 @@ ${typeof this.categories.name === 'undefined' ? d[2] : this.categories[d[2]]}</b
       });
     }
 
-    const legendElementHeight = height / 30;
-    const legendElementWidth = width / 30;
-    const legendPadding = legendElementHeight / 2;
+    const legendRectHeight = height / 30;
+    const legendRectWidth = width / 30;
+    const legendPadding = legendRectHeight / 2;
     const legendXPos = width * 0.7;
-    const legendYPos = legendElementHeight;
-    const legendTextMaxWidth = width - legendXPos - legendElementWidth;
+    const legendYPos = legendRectHeight;
+    const legendTextMaxWidth = width - legendXPos - legendRectWidth;
 
     this.legend
       .attr('transform', `translate(${legendXPos}, ${legendYPos})`)
-      .append('rect')
-      .attr('width', legendElementWidth + legendTextMaxWidth)
-      .attr('height', (Object.keys(this.categories).length) * legendElementHeight + legendPadding)
-      .attr('fill', '#fff')
-      .style('opacity', '0.7');
+      .select('rect')
+      .attr('width', legendRectWidth + legendTextMaxWidth)
+      .attr('height', (Object.keys(this.categories).length) * legendRectHeight + legendPadding);
 
     const legendElement = this.legend.selectAll('.ac-scatter-legend-element')
-      .data(Object.keys(this.categories).filter(d => d !== 'name'));
+      .data(Object.keys(this.categories).filter(d => d !== 'name'), d => d);
 
     const legendEnter = legendElement.enter()
       .append('g')
-      .attr('class', 'ac-scatter-legend-element');
+      .attr('class', 'ac-scatter-legend-element')
+      .merge(legendElement)
+      .on('click', (d) => {
+        if (d === _selectedCategory) {
+          this.render({});
+        } else {
+          this.render({ _selectedCategory: d });
+        }
+      })
+      .style('opacity', d => ((typeof _selectedCategory === 'undefined' || d === _selectedCategory) ? 1 : 0.3));
 
-    legendEnter
-      .append('rect')
-      .attr('y', (_, i) => (legendElementHeight + legendPadding) * i)
-      .attr('height', legendElementHeight)
-      .attr('width', legendElementWidth)
+    legendEnter.append('rect')
+      .attr('y', (_, i) => (legendRectHeight + legendPadding) * i)
+      .attr('height', legendRectHeight)
+      .attr('width', legendRectWidth)
       .attr('fill', d => color(d));
 
-    legendEnter
-      .append('text')
-      .attr('x', legendElementWidth * 1.1)
-      .attr('y', (_, i) => ((legendElementHeight + legendPadding) * i + legendElementHeight / 2))
+    legendEnter.append('text')
+      .attr('x', legendRectWidth * 1.1)
+      .attr('y', (_, i) => ((legendRectHeight + legendPadding) * i + legendRectHeight / 2))
       .style('dominant-baseline', 'central')
       .text(d => this.categories[d])
       .call(wrap, legendTextMaxWidth);
@@ -266,35 +274,37 @@ ${typeof this.categories.name === 'undefined' ? d[2] : this.categories[d[2]]}</b
     ctx.clearRect(0, 0, width, height);
     hiddenCtx.clearRect(0, 0, width, height);
     nodes.forEach((node, i) => {
-      // draw visible point
-      ctx.beginPath();
-      ctx.arc(
-        node.getAttribute('dx'),
-        node.getAttribute('dy'),
-        node.getAttribute('r'),
-        0,
-        2 * Math.PI,
-        false,
-      );
-      ctx.fillStyle = node.getAttribute('fillStyle');
-      ctx.fill();
+      if (typeof _selectedCategory === 'undefined' || node.getAttribute('data-z') === _selectedCategory) {
+        // draw visible point
+        ctx.beginPath();
+        ctx.arc(
+          node.getAttribute('dx'),
+          node.getAttribute('dy'),
+          node.getAttribute('r'),
+          0,
+          2 * Math.PI,
+          false,
+        );
+        ctx.fillStyle = node.getAttribute('fillStyle');
+        ctx.fill();
 
-      // draw invisible square with unique color
-      const colorCode = i + 1;
-      // eslint-disable-next-line no-bitwise
-      const r = colorCode >> 16;
-      // eslint-disable-next-line no-bitwise
-      const g = colorCode - (r << 16) >> 8;
-      // eslint-disable-next-line no-bitwise
-      const b = colorCode - (r << 16) - (g << 8);
-      this.colorToTooltipMap[`${r}:${g}:${b}`] = node.getAttribute('title');
-      hiddenCtx.fillStyle = `rgb(${r}, ${g}, ${b})`;
-      hiddenCtx.fillRect(
-        parseInt(node.getAttribute('dx') - node.getAttribute('r'), 10),
-        parseInt(node.getAttribute('dy') - node.getAttribute('r'), 10),
-        Math.ceil(node.getAttribute('r') * 2 + 0.5),
-        Math.ceil(node.getAttribute('r') * 2 + 0.5),
-      );
+        // draw invisible square with unique color
+        const colorCode = i + 1;
+        // eslint-disable-next-line no-bitwise
+        const r = colorCode >> 16;
+        // eslint-disable-next-line no-bitwise
+        const g = colorCode - (r << 16) >> 8;
+        // eslint-disable-next-line no-bitwise
+        const b = colorCode - (r << 16) - (g << 8);
+        this.colorToTooltipMap[`${r}:${g}:${b}`] = node.getAttribute('title');
+        hiddenCtx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+        hiddenCtx.fillRect(
+          parseInt(node.getAttribute('dx') - node.getAttribute('r'), 10),
+          parseInt(node.getAttribute('dy') - node.getAttribute('r'), 10),
+          Math.ceil(node.getAttribute('r') * 2 + 0.5),
+          Math.ceil(node.getAttribute('r') * 2 + 0.5),
+        );
+      }
     });
   }
 }
