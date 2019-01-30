@@ -18,6 +18,23 @@ export default class extends Chart {
     this.tooltip = d3.select(container)
       .append('div')
       .attr('class', 'ac-scatter-tooltip');
+
+    this.axisBottom = this.svg
+      .append('g')
+      .attr('class', 'ac-scatter-x-axis ac-scatter-axis');
+
+    this.axisTop = this.svg
+      .append('g')
+      .attr('class', 'ac-scatter-x-axis ac-scatter-axis');
+
+    this.axisLeft = this.svg
+      .append('g')
+      .attr('class', 'ac-scatter-y-axis ac-scatter-axis');
+
+    this.axisRight = this.svg
+      .append('g')
+      .attr('class', 'ac-scatter-y-axis ac-scatter-axis');
+
     this.legend = this.svg
       .append('g')
       .attr('class', 'ac-scatter-legend');
@@ -102,25 +119,17 @@ export default class extends Chart {
       .tickSizeInner(width)
       .tickFormat('');
 
-    this.svg
-      .append('g')
-      .attr('class', 'ac-scatter-x-axis ac-scatter-axis')
+    this.axisBottom
       .attr('transform', `translate(0, ${height})`)
       .call(xAxisBottom);
 
-    this.svg
-      .append('g')
-      .attr('class', 'ac-scatter-x-axis ac-scatter-axis')
+    this.axisTop
       .call(xAxisTop);
 
-    this.svg
-      .append('g')
-      .attr('class', 'ac-scatter-y-axis ac-scatter-axis')
+    this.axisLeft
       .call(yAxisLeft);
 
-    this.svg
-      .append('g')
-      .attr('class', 'ac-scatter-y-axis ac-scatter-axis')
+    this.axisRight
       .attr('transform', `translate(${width}, 0)`)
       .call(yAxisRight);
 
