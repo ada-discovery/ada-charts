@@ -277,49 +277,51 @@ ${typeof this.categories.name === 'undefined' ? d[2] : this.categories[d[2]]}</b
     legendElement.exit()
       .remove();
 
-    const nodes = this.memory.selectAll('circle').nodes();
+    const nodes = this.memory.selectAll('circle')
+      .filter(d => typeof _selectedCategory === 'undefined' || d[2] === _selectedCategory)
+      .nodes();
+
     const ctx = this.canvas.node().getContext('2d');
-    const hiddenCtx = this.hiddenCanvas.getContext('2d');
-    this.colorToTooltipMap = {};
     const t = d3.timer((elapsed) => {
       setTimeout(() => {
         ctx.clearRect(0, 0, width, height);
-        hiddenCtx.clearRect(0, 0, width, height);
-        nodes.forEach((node, i) => {
-          if (typeof _selectedCategory === 'undefined' || node.getAttribute('data-z') === _selectedCategory) {
-            // draw visible point
-            ctx.beginPath();
-            ctx.arc(
-              node.getAttribute('dx'),
-              node.getAttribute('dy'),
-              node.getAttribute('r'),
-              0,
-              2 * Math.PI,
-              false,
-            );
-            ctx.fillStyle = node.getAttribute('fillStyle');
-            ctx.fill();
-
-            // draw invisible square with unique color
-            const colorCode = i + 1;
-            // eslint-disable-next-line no-bitwise
-            const r = colorCode >> 16;
-            // eslint-disable-next-line no-bitwise
-            const g = colorCode - (r << 16) >> 8;
-            // eslint-disable-next-line no-bitwise
-            const b = colorCode - (r << 16) - (g << 8);
-            this.colorToTooltipMap[`${r}:${g}:${b}`] = node.getAttribute('title');
-            hiddenCtx.fillStyle = `rgb(${r}, ${g}, ${b})`;
-            hiddenCtx.fillRect(
-              parseInt(node.getAttribute('dx') - node.getAttribute('r'), 10),
-              parseInt(node.getAttribute('dy') - node.getAttribute('r'), 10),
-              Math.ceil(node.getAttribute('r') * 2 + 0.5),
-              Math.ceil(node.getAttribute('r') * 2 + 0.5),
-            );
-          }
+        nodes.forEach((node) => {
+          ctx.beginPath();
+          ctx.arc(
+            node.getAttribute('dx'),
+            node.getAttribute('dy'),
+            node.getAttribute('r'),
+            0,
+            2 * Math.PI,
+            false,
+          );
+          ctx.fillStyle = node.getAttribute('fillStyle');
+          ctx.fill();
         });
       }, 0);
-      if (elapsed > ANIMATION_DURATION * 2) t.stop();
+      if (elapsed > ANIMATION_DURATION * 2) {
+        t.stop();
+        this.colorToTooltipMap = {};
+        const hiddenCtx = this.hiddenCanvas.getContext('2d');
+        hiddenCtx.clearRect(0, 0, width, height);
+        nodes.forEach((node, i) => {
+          const colorCode = i + 1;
+          // eslint-disable-next-line no-bitwise
+          const r = colorCode >> 16;
+          // eslint-disable-next-line no-bitwise
+          const g = colorCode - (r << 16) >> 8;
+          // eslint-disable-next-line no-bitwise
+          const b = colorCode - (r << 16) - (g << 8);
+          this.colorToTooltipMap[`${r}:${g}:${b}`] = node.getAttribute('title');
+          hiddenCtx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+          hiddenCtx.fillRect(
+            parseInt(node.getAttribute('dx') - node.getAttribute('r'), 10),
+            parseInt(node.getAttribute('dy') - node.getAttribute('r'), 10),
+            Math.ceil(node.getAttribute('r') * 2 + 0.5),
+            Math.ceil(node.getAttribute('r') * 2 + 0.5),
+          );
+        });
+      }
     }, 0);
   }
 }
