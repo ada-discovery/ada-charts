@@ -2,6 +2,8 @@ import * as d3 from 'd3';
 import Chart from '../Chart';
 import '../../assets/css/scatterplot.css';
 
+const ANIMATION_DURATION = 500;
+
 export default class extends Chart {
   constructor({ container }) {
     super({ container });
@@ -175,7 +177,12 @@ export default class extends Chart {
 
     point.enter()
       .append('circle')
+      .attr('dx', width / 2)
+      .attr('dy', height / 2)
       .merge(point)
+      .transition()
+      .duration(ANIMATION_DURATION)
+      .delay((_, i) => i * (ANIMATION_DURATION / this.values.length))
       .attr('dx', d => x(d[0]))
       .attr('dy', d => y(d[1]))
       .attr('data-z', d => d[2])
@@ -274,40 +281,45 @@ ${typeof this.categories.name === 'undefined' ? d[2] : this.categories[d[2]]}</b
     const ctx = this.canvas.node().getContext('2d');
     const hiddenCtx = this.hiddenCanvas.getContext('2d');
     this.colorToTooltipMap = {};
-    ctx.clearRect(0, 0, width, height);
-    hiddenCtx.clearRect(0, 0, width, height);
-    nodes.forEach((node, i) => {
-      if (typeof _selectedCategory === 'undefined' || node.getAttribute('data-z') === _selectedCategory) {
-        // draw visible point
-        ctx.beginPath();
-        ctx.arc(
-          node.getAttribute('dx'),
-          node.getAttribute('dy'),
-          node.getAttribute('r'),
-          0,
-          2 * Math.PI,
-          false,
-        );
-        ctx.fillStyle = node.getAttribute('fillStyle');
-        ctx.fill();
+    const t = d3.timer((elapsed) => {
+      setTimeout(() => {
+        ctx.clearRect(0, 0, width, height);
+        hiddenCtx.clearRect(0, 0, width, height);
+        nodes.forEach((node, i) => {
+          if (typeof _selectedCategory === 'undefined' || node.getAttribute('data-z') === _selectedCategory) {
+            // draw visible point
+            ctx.beginPath();
+            ctx.arc(
+              node.getAttribute('dx'),
+              node.getAttribute('dy'),
+              node.getAttribute('r'),
+              0,
+              2 * Math.PI,
+              false,
+            );
+            ctx.fillStyle = node.getAttribute('fillStyle');
+            ctx.fill();
 
-        // draw invisible square with unique color
-        const colorCode = i + 1;
-        // eslint-disable-next-line no-bitwise
-        const r = colorCode >> 16;
-        // eslint-disable-next-line no-bitwise
-        const g = colorCode - (r << 16) >> 8;
-        // eslint-disable-next-line no-bitwise
-        const b = colorCode - (r << 16) - (g << 8);
-        this.colorToTooltipMap[`${r}:${g}:${b}`] = node.getAttribute('title');
-        hiddenCtx.fillStyle = `rgb(${r}, ${g}, ${b})`;
-        hiddenCtx.fillRect(
-          parseInt(node.getAttribute('dx') - node.getAttribute('r'), 10),
-          parseInt(node.getAttribute('dy') - node.getAttribute('r'), 10),
-          Math.ceil(node.getAttribute('r') * 2 + 0.5),
-          Math.ceil(node.getAttribute('r') * 2 + 0.5),
-        );
-      }
-    });
+            // draw invisible square with unique color
+            const colorCode = i + 1;
+            // eslint-disable-next-line no-bitwise
+            const r = colorCode >> 16;
+            // eslint-disable-next-line no-bitwise
+            const g = colorCode - (r << 16) >> 8;
+            // eslint-disable-next-line no-bitwise
+            const b = colorCode - (r << 16) - (g << 8);
+            this.colorToTooltipMap[`${r}:${g}:${b}`] = node.getAttribute('title');
+            hiddenCtx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+            hiddenCtx.fillRect(
+              parseInt(node.getAttribute('dx') - node.getAttribute('r'), 10),
+              parseInt(node.getAttribute('dy') - node.getAttribute('r'), 10),
+              Math.ceil(node.getAttribute('r') * 2 + 0.5),
+              Math.ceil(node.getAttribute('r') * 2 + 0.5),
+            );
+          }
+        });
+      }, 0);
+      if (elapsed > ANIMATION_DURATION * 2) t.stop();
+    }, 0);
   }
 }
