@@ -232,7 +232,7 @@ ${typeof this.categories.name === 'undefined' ? d[2] : this.categories[d[2]]}</b
       .attr('width', legendElementWidth + legendTextMaxWidth)
       .attr('height', (Object.keys(this.categories).length) * legendElementHeight + legendPadding)
       .attr('fill', '#fff')
-      .style('opacity', '0.8');
+      .style('opacity', '0.7');
 
     const legendElement = this.legend.selectAll('.ac-scatter-legend-element')
       .data(Object.keys(this.categories).filter(d => d !== 'name'));

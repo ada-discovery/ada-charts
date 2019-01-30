@@ -36,7 +36,7 @@
     white-space: nowrap;
     font-size: 0.75em;
     position: absolute;
-    background: rgba(0,0,0,0.7);
+    background: rgb(43, 183, 179);
     pointer-events: none;
     color: white;
     padding: 0.5vh;
@@ -45,4 +45,8 @@
 
 .ac-scatter-legend-element {
     font-size: 0.75em;
+}
+
+.ac-scatter-brush .selection {
+    fill: rgb(43, 183, 179);
 }
