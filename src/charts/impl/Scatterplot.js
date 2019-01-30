@@ -170,11 +170,12 @@ export default class extends Chart {
         this.tooltip.style('visibility', 'hidden');
       });
 
-    const point = this.memory.selectAll('.ac-scatter-point')
-      .data(this.values);
+    const point = this.memory.selectAll('circle')
+      .data(this.values, d => `${d[0]}:${d[1]}:${d[2]}`);
 
     point.enter()
       .append('circle')
+      .merge(point)
       .attr('dx', d => x(d[0]))
       .attr('dy', d => y(d[1]))
       .attr('data-z', d => d[2])
@@ -236,11 +237,13 @@ ${typeof this.categories.name === 'undefined' ? d[2] : this.categories[d[2]]}</b
       .attr('height', (Object.keys(this.categories).length) * legendRectHeight + legendPadding);
 
     const legendElement = this.legend.selectAll('.ac-scatter-legend-element')
-      .data(Object.keys(this.categories).filter(d => d !== 'name'), d => d);
+      .data(Object.keys(this.categories).filter(d => d !== 'name'), d => `${d}:${this.categories[d]}`);
 
     const legendEnter = legendElement.enter()
       .append('g')
-      .attr('class', 'ac-scatter-legend-element')
+      .attr('class', 'ac-scatter-legend-element');
+
+    legendEnter
       .merge(legendElement)
       .on('click', (d) => {
         if (d === _selectedCategory) {
