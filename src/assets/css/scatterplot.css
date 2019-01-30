@@ -42,3 +42,7 @@
     padding: 0.5vh;
     visibility: hidden;
 }
+
+.ac-scatter-legend-element {
+    font-size: 0.75em;
+}

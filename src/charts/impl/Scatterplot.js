@@ -46,10 +46,10 @@ export default class extends Chart {
     this.callback = typeof callback === 'undefined' ? this.callback : callback;
 
     const margin = {
-      top: 50,
-      right: 50,
-      bottom: 50,
-      left: 50,
+      top: 20,
+      right: 20,
+      bottom: this.containerWidth / 20,
+      left: this.containerWidth / 20,
     };
 
     const width = this.containerWidth - margin.left - margin.right;
@@ -177,23 +177,75 @@ ${typeof this.categories.name === 'undefined' ? d[2] : this.categories[d[2]]}</b
     point.exit()
       .remove();
 
-    const legendElementHeight = height / 20;
-    const legendElementWidth = width / 20;
+    function wrap(nodes, maxWidth) {
+      nodes.each(function () {
+        const text = d3.select(this);
+        const words = text.text().split(/\s+/);
+        let line = [];
+        let lineNumber = 0;
+        const lineHeight = 1.1; // ems
+        let tspan = text.text(null)
+          .append('tspan')
+          .attr('x', text.attr('x'))
+          .attr('y', text.attr('y'));
+        words.forEach((word, i) => {
+          line.push(word);
+          tspan.text(line.join(' '));
+          if (tspan.node().getComputedTextLength() > maxWidth) {
+            if (i > 0) {
+              line.pop();
+              tspan.text(lineNumber === 1 ? `${line.join(' ')}...` : line.join(' '));
+              if (lineNumber < 1) {
+                lineNumber += 1;
+                line = [word];
+                tspan = text.append('tspan')
+                  .attr('x', text.attr('x'))
+                  .attr('y', text.attr('y'))
+                  .attr('dy', `${lineNumber * lineHeight}em`)
+                  .text(word);
+              }
+            }
+          }
+        });
+      });
+    }
+
+    const legendElementHeight = height / 30;
+    const legendElementWidth = width / 30;
+    const legendPadding = legendElementHeight / 2;
+    const legendXPos = width * 0.7;
+    const legendYPos = legendElementHeight;
+    const legendTextMaxWidth = width - legendXPos - legendElementWidth;
 
     this.legend
-      .attr('transform', `translate(${width - legendElementWidth}, ${legendElementHeight})`);
+      .attr('transform', `translate(${legendXPos}, ${legendYPos})`)
+      .append('rect')
+      .attr('width', legendElementWidth + legendTextMaxWidth)
+      .attr('height', (Object.keys(this.categories).length) * legendElementHeight + legendPadding)
+      .attr('fill', '#fff')
+      .style('opacity', '0.8');
 
     const legendElement = this.legend.selectAll('.ac-scatter-legend-element')
       .data(Object.keys(this.categories).filter(d => d !== 'name'));
 
-    legendElement.enter()
+    const legendEnter = legendElement.enter()
       .append('g')
-      .attr('class', 'ac-scatter-legend-element')
+      .attr('class', 'ac-scatter-legend-element');
+
+    legendEnter
       .append('rect')
-      .attr('y', (_, i) => legendElementHeight * i)
+      .attr('y', (_, i) => (legendElementHeight + legendPadding) * i)
       .attr('height', legendElementHeight)
       .attr('width', legendElementWidth)
       .attr('fill', d => color(d));
+
+    legendEnter
+      .append('text')
+      .attr('x', legendElementWidth * 1.1)
+      .attr('y', (_, i) => ((legendElementHeight + legendPadding) * i + legendElementHeight / 2))
+      .style('dominant-baseline', 'central')
+      .text(d => this.categories[d])
+      .call(wrap, legendTextMaxWidth);
 
     legendElement.exit()
       .remove();
