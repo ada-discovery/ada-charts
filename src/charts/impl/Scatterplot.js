@@ -9,7 +9,7 @@ export default class extends Chart {
   constructor({ container }) {
     super({ container });
 
-    this.memory = d3.select(document.createElement('memory'))
+    this.memory = d3.select(document.createElement('memory'));
     this.hiddenCanvas = document.createElement('canvas');
     this.svg = d3.select(container)
       .append('svg')
@@ -101,8 +101,8 @@ export default class extends Chart {
     const margin = {
       top: 30,
       right: 20,
-      bottom: this.containerWidth / 20,
-      left: this.containerWidth / 20,
+      bottom: this.containerWidth / 15,
+      left: this.containerWidth / 15,
     };
 
     const width = this.containerWidth - margin.left - margin.right;
@@ -229,7 +229,7 @@ export default class extends Chart {
       .delay((_, i) => i * (ANIMATION_DURATION / this.values.length))
       .attr('dx', d => x(d[0]))
       .attr('dy', d => y(d[1]))
-      .style('opacity', d => ((typeof _selectedCategory !== 'undefined' && d[2] !== _selectedCategory) ? 0.3 : 1))
+      .style('opacity', d => ((typeof _selectedCategory !== 'undefined' && d[2] !== _selectedCategory) ? 0.2 : 1))
       .attr('r', Math.ceil(width / 150))
       .attr('fillStyle', d => color(d[2]))
       .attr('title', d => `
