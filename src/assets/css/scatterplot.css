@@ -34,8 +34,9 @@
 .ac-scatter-tooltip {
     white-space: nowrap;
     font-size: 0.75em;
+    font-weight: bold;
     position: absolute;
-    background: rgb(43, 183, 179);
+    background: rgba(43, 183, 179, 0.7);
     pointer-events: none;
     color: white;
     padding: 0.5vh;
