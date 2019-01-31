@@ -194,7 +194,7 @@ export default class extends Chart {
       .text(this.title);
 
     const point = this.memory.selectAll('circle')
-      .data(this.values, d => `${d[0]}:${d[1]}:${d[2]}`);
+      .data(this.values);
 
     point.enter()
       .append('circle')
@@ -206,7 +206,7 @@ export default class extends Chart {
       .delay((_, i) => i * (ANIMATION_DURATION / this.values.length))
       .attr('dx', d => x(d[0]))
       .attr('dy', d => y(d[1]))
-      .attr('data-category', d => d[2])
+      .style('opacity', d => ((typeof _selectedCategory !== 'undefined' && d[2] !== _selectedCategory) ? 0.3 : 1))
       .attr('r', Math.ceil(width / 150))
       .attr('fillStyle', d => color(d[2]))
       .attr('title', d => `
@@ -278,9 +278,9 @@ ${!categoryKeys ? d[2] : this.categories[d[2]]}</br>
       .merge(legendElement)
       .on('click', (d) => {
         if (d === _selectedCategory) {
-          this.render({ _skipAnimation: true });
+          this.render({ _skipAnimation: false });
         } else {
-          this.render({ _selectedCategory: d, _skipAnimation: true });
+          this.render({ _selectedCategory: d, _skipAnimation: false });
         }
       })
       .style('opacity', d => ((typeof _selectedCategory === 'undefined' || d === _selectedCategory) ? 1 : 0.3));
@@ -318,11 +318,7 @@ ${!categoryKeys ? d[2] : this.categories[d[2]]}</br>
             2 * Math.PI,
             false,
           );
-          ctx.globalAlpha = 1;
-          if (typeof _selectedCategory !== 'undefined'
-            && parseInt(node.getAttribute('data-category'), 10) !== _selectedCategory) {
-            ctx.globalAlpha = 0.2;
-          }
+          ctx.globalAlpha = node.style.opacity;
           ctx.fillStyle = node.getAttribute('fillStyle');
           ctx.fill();
           ctx.strokeStyle = '#fff';
