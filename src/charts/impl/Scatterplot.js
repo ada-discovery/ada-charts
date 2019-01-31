@@ -2,7 +2,7 @@ import * as d3 from 'd3';
 import Chart from '../Chart';
 import '../../assets/css/scatterplot.css';
 
-const ANIMATION_DURATION = 0;
+const ANIMATION_DURATION = 500;
 
 export default class extends Chart {
   constructor({ container }) {
@@ -66,7 +66,7 @@ export default class extends Chart {
     categories,
     callback,
     _selectedCategory,
-    _skipAnimation
+    _skipAnimation,
   }) {
     this.values = typeof values === 'undefined' ? this.values : values;
     this.categories = typeof categories === 'undefined' ? this.categories : categories;
