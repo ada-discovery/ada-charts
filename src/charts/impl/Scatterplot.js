@@ -2,7 +2,7 @@ import * as d3 from 'd3';
 import Chart from '../Chart';
 import '../../assets/css/scatterplot.css';
 
-const ANIMATION_DURATION = 500;
+const ANIMATION_DURATION = 0;
 
 export default class extends Chart {
   constructor({ container }) {
@@ -66,6 +66,7 @@ export default class extends Chart {
     categories,
     callback,
     _selectedCategory,
+    _skipAnimation
   }) {
     this.values = typeof values === 'undefined' ? this.values : values;
     this.categories = typeof categories === 'undefined' ? this.categories : categories;
@@ -258,9 +259,9 @@ ${!categoryKeys ? d[2] : this.categories[d[2]]}</br>
       .merge(legendElement)
       .on('click', (d) => {
         if (d === _selectedCategory) {
-          this.render({});
+          this.render({ _skipAnimation: true });
         } else {
-          this.render({ _selectedCategory: d });
+          this.render({ _selectedCategory: d, _skipAnimation: true });
         }
       })
       .style('opacity', d => ((typeof _selectedCategory === 'undefined' || d === _selectedCategory) ? 1 : 0.3));
@@ -303,7 +304,7 @@ ${!categoryKeys ? d[2] : this.categories[d[2]]}</br>
           ctx.fill();
         });
       }, 0);
-      if (elapsed > ANIMATION_DURATION * 2) {
+      if (elapsed > ANIMATION_DURATION * 2 || _skipAnimation) {
         t.stop();
         // draw tooltips once after animation is over
         this.colorToTooltipMap = {};
