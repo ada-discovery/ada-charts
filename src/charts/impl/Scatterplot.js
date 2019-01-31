@@ -9,15 +9,13 @@ export default class extends Chart {
   constructor({ container }) {
     super({ container });
 
-    this.memory = d3.select(document.createElement('memory'));
-    this.canvas = d3.select(container)
-      .append('canvas')
-      .attr('class', 'ac-scatter-canvas');
+    this.memory = d3.select(document.createElement('memory'))
     this.hiddenCanvas = document.createElement('canvas');
     this.svg = d3.select(container)
       .append('svg')
       .attr('class', 'ac-scatter-svg')
       .append('g');
+
     this.tooltip = d3.select(container)
       .append('div')
       .attr('class', 'ac-scatter-tooltip');
@@ -38,6 +36,21 @@ export default class extends Chart {
       .append('g')
       .attr('class', 'ac-scatter-y-axis ac-scatter-axis');
 
+    this.foreignObject = this.svg
+      .append('foreignObject');
+
+    this.foreignBody = this.foreignObject
+      .append('xhtml:body')
+      .style('margin', '0px')
+      .style('padding', '0px')
+      .style('background-color', 'none');
+
+    this.canvas = this.foreignBody
+      .append('canvas')
+      .attr('x', 0)
+      .attr('y', 0)
+      .attr('class', 'ac-scatter-canvas');
+
     this.titleHeader = this.svg
       .append('text')
       .attr('class', 'ac-scatter-title');
@@ -49,6 +62,7 @@ export default class extends Chart {
     this.legend = this.svg
       .append('g')
       .attr('class', 'ac-scatter-legend');
+
     this.legend
       .append('rect');
 
@@ -116,10 +130,19 @@ export default class extends Chart {
         .range(d3.schemeSet2);
     }
 
+    this.foreignObject
+      .attr('x', margin.x)
+      .attr('y', margin.y)
+      .attr('width', width)
+      .attr('height', height);
+
+    this.foreignBody
+      .style('width', `${width}px`)
+      .style('height', `${height}px`);
+
     this.canvas
       .attr('width', width)
-      .attr('height', height)
-      .style('transform', `translate(${margin.left}px, ${margin.top}px)`);
+      .attr('height', height);
 
     this.hiddenCanvas.width = width;
     this.hiddenCanvas.height = height;
