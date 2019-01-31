@@ -71,6 +71,10 @@ export default class extends Chart {
     this.categories = typeof categories === 'undefined' ? this.categories : categories;
     this.callback = typeof callback === 'undefined' ? this.callback : callback;
 
+    const categoryKeys = Object.keys(this.categories)
+      .filter(d => d !== 'name')
+      .map(d => parseInt(d, 10));
+
     const margin = {
       top: 20,
       right: 20,
@@ -94,12 +98,12 @@ export default class extends Chart {
       .range([height - padding, padding]);
 
     let color;
-    if (typeof this.categories.name === 'undefined') {
+    if (!categoryKeys.length) {
       color = d3.scaleSequential(d3.interpolateBlues)
         .domain(d3.extent(this.values.map(d => d[2])));
     } else {
       color = d3.scaleOrdinal()
-        .domain(Object.keys(this.categories).filter(d => d !== 'name'))
+        .domain(categoryKeys)
         .range(d3.schemeSet2);
     }
 
@@ -191,7 +195,7 @@ export default class extends Chart {
       .attr('title', d => `
 ${d[0]}</br>
 ${d[1]}</br>
-${typeof this.categories.name === 'undefined' ? d[2] : this.categories[d[2]]}</br>
+${!categoryKeys ? d[2] : this.categories[d[2]]}</br>
 `);
 
     point.exit()
@@ -241,10 +245,10 @@ ${typeof this.categories.name === 'undefined' ? d[2] : this.categories[d[2]]}</b
       .attr('transform', `translate(${legendXPos}, ${legendYPos})`)
       .select('rect')
       .attr('width', legendRectWidth + legendTextMaxWidth)
-      .attr('height', (Object.keys(this.categories).length) * legendRectHeight + legendPadding);
+      .attr('height', (categoryKeys.length + 1) * legendRectHeight + legendPadding);
 
     const legendElement = this.legend.selectAll('.ac-scatter-legend-element')
-      .data(Object.keys(this.categories).filter(d => d !== 'name'), d => `${d}:${this.categories[d]}`);
+      .data(categoryKeys, d => `${d}:${this.categories[d]}`);
 
     const legendEnter = legendElement.enter()
       .append('g')
@@ -301,6 +305,7 @@ ${typeof this.categories.name === 'undefined' ? d[2] : this.categories[d[2]]}</b
       }, 0);
       if (elapsed > ANIMATION_DURATION * 2) {
         t.stop();
+        // draw tooltips once after animation is over
         this.colorToTooltipMap = {};
         const hiddenCtx = this.hiddenCanvas.getContext('2d');
         hiddenCtx.clearRect(0, 0, width, height);
