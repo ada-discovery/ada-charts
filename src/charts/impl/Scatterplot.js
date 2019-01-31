@@ -55,6 +55,14 @@ export default class extends Chart {
       .append('text')
       .attr('class', 'ac-scatter-title');
 
+    this.xLabel = this.svg
+      .append('text')
+      .attr('class', 'ac-scatter-axis-text');
+
+    this.yLabel = this.svg
+      .append('text')
+      .attr('class', 'ac-scatter-axis-text');
+
     this.brush = this.svg
       .append('g')
       .attr('class', 'ac-scatter-brush');
@@ -69,6 +77,8 @@ export default class extends Chart {
     this.values = [];
     this.categories = {};
     this.title = '';
+    this.xAxisLabel = '';
+    this.yAxisLabel = '';
     this.callback = () => {};
     this.colorToTooltipMap = {};
   }
@@ -85,6 +95,8 @@ export default class extends Chart {
     values,
     categories,
     title,
+    xAxisLabel,
+    yAxisLabel,
     callback,
     _selectedCategory,
     _skipAnimation,
@@ -92,6 +104,8 @@ export default class extends Chart {
     this.values = typeof values === 'undefined' ? this.values : values;
     this.categories = typeof categories === 'undefined' ? this.categories : categories;
     this.title = typeof title === 'undefined' ? this.title : title;
+    this.xAxisLabel = typeof xAxisLabel === 'undefined' ? this.xAxisLabel : xAxisLabel;
+    this.yAxisLabel = typeof yAxisLabel === 'undefined' ? this.yAxisLabel : yAxisLabel;
     this.callback = typeof callback === 'undefined' ? this.callback : callback;
 
     const categoryKeys = Object.keys(this.categories)
@@ -99,17 +113,17 @@ export default class extends Chart {
       .map(d => parseInt(d, 10));
 
     const margin = {
-      top: 30,
-      right: 20,
-      bottom: this.containerWidth / 15,
-      left: this.containerWidth / 15,
+      top: this.containerWidth / 15,
+      right: this.containerWidth / 15,
+      bottom: this.containerWidth / 10,
+      left: this.containerWidth / 10,
     };
 
     const width = this.containerWidth - margin.left - margin.right;
     const height = this.containerWidth - margin.top - margin.bottom;
 
     const tooltipOffset = width / 100;
-
+    const yLabelSize = (margin.left / 5) > MAX_FONT_SIZE ? MAX_FONT_SIZE : (margin.left / 5);
     const padding = width / 40;
 
     const x = d3.scaleLinear()
@@ -157,21 +171,35 @@ export default class extends Chart {
     const xAxisTop = d3.axisBottom(x)
       .tickSizeInner(height)
       .tickFormat('');
-
     const yAxisLeft = d3.axisLeft(y);
     const yAxisRight = d3.axisLeft(y)
       .tickSizeInner(width)
       .tickFormat('');
 
+    function axisWrap(nodes, maxWidth) {
+      const D3_AXIS_TEXT_OFFSET = 9;
+      nodes.each(function () {
+        const text = d3.select(this);
+        while (text.node().getComputedTextLength() > maxWidth - D3_AXIS_TEXT_OFFSET) {
+          const fontSize = parseInt(text.style('font-size').split('px')[0], 10);
+          text.style('font-size', `${(fontSize) - 1}px`);
+        }
+      });
+    }
+
     this.axisBottom
       .attr('transform', `translate(0, ${height})`)
-      .call(xAxisBottom);
+      .call(xAxisBottom)
+      .selectAll('text')
+      .call(axisWrap, width / (x.ticks().length));
 
     this.axisTop
       .call(xAxisTop);
 
     this.axisLeft
-      .call(yAxisLeft);
+      .call(yAxisLeft)
+      .selectAll('text')
+      .call(axisWrap, margin.left - yLabelSize);
 
     this.axisRight
       .attr('transform', `translate(${width}, 0)`)
@@ -213,8 +241,23 @@ export default class extends Chart {
       .attr('y', -margin.top / 2)
       .attr('text-anchor', 'middle')
       .style('dominant-baseline', 'central')
-      .style('font-size', `${margin.top > MAX_FONT_SIZE ? MAX_FONT_SIZE : margin.top}px`)
+      .style('font-size', `${margin.top / 2 > MAX_FONT_SIZE ? MAX_FONT_SIZE : margin.top / 2}px`)
       .text(this.title);
+
+    this.xLabel
+      .attr('text-anchor', 'middle')
+      .style('dominant-baseline', 'central')
+      .style('font-size', MAX_FONT_SIZE)
+      .attr('transform', `translate(${width / 2}, ${height + margin.bottom - MAX_FONT_SIZE / 2})`)
+      .text(this.xAxisLabel);
+
+
+    this.yLabel
+      .attr('text-anchor', 'middle')
+      .style('dominant-baseline', 'central')
+      .style('font-size', yLabelSize)
+      .attr('transform', `translate(${-margin.left + yLabelSize / 2}, ${height / 2})rotate(-90)`)
+      .text(this.yAxisLabel);
 
     const point = this.memory.selectAll('circle')
       .data(this.values);
@@ -244,7 +287,7 @@ ${!categoryKeys ? d[2] : this.categories[d[2]]}</br>
       .attr('r', 0)
       .remove();
 
-    function wrap(nodes, maxWidth) {
+    function legendWrap(nodes, maxWidth) {
       nodes.each(function () {
         const text = d3.select(this);
         const words = text.text().split(/\s+/);
@@ -319,7 +362,7 @@ ${!categoryKeys ? d[2] : this.categories[d[2]]}</br>
       .attr('y', (_, i) => ((legendRectHeight + legendPadding) * i + legendRectHeight / 2))
       .style('dominant-baseline', 'central')
       .text(d => this.categories[d])
-      .call(wrap, legendTextMaxWidth);
+      .call(legendWrap, legendTextMaxWidth);
 
     legendElement.exit()
       .remove();

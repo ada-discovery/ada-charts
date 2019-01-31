@@ -40,9 +40,11 @@
 
   function update() {
     scatterplot.update({
-      values: generateRandomData(1000, -100, 100),
+      values: generateRandomData(1000, -10000, 10000),
       categories: { name: 'Gender', 0: 'male', 2: 'female', 1: 'N/A'},
       title: 'Scatterplot',
+      xAxisLabel: 'X Axis Values',
+      yAxisLabel: 'Y Axis Values',
       callback: d => console.log(d),
     });
   }
