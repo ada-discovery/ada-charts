@@ -3,6 +3,7 @@ import Chart from '../Chart';
 import '../../assets/css/scatterplot.css';
 
 const ANIMATION_DURATION = 500;
+const MAX_FONT_SIZE = 20;
 
 export default class extends Chart {
   constructor({ container }) {
@@ -37,6 +38,10 @@ export default class extends Chart {
       .append('g')
       .attr('class', 'ac-scatter-y-axis ac-scatter-axis');
 
+    this.titleHeader = this.svg
+      .append('text')
+      .attr('class', 'ac-scatter-title');
+
     this.brush = this.svg
       .append('g')
       .attr('class', 'ac-scatter-brush');
@@ -49,6 +54,7 @@ export default class extends Chart {
 
     this.values = [];
     this.categories = {};
+    this.title = '';
     this.callback = () => {};
     this.colorToTooltipMap = {};
   }
@@ -64,12 +70,14 @@ export default class extends Chart {
   render({
     values,
     categories,
+    title,
     callback,
     _selectedCategory,
     _skipAnimation,
   }) {
     this.values = typeof values === 'undefined' ? this.values : values;
     this.categories = typeof categories === 'undefined' ? this.categories : categories;
+    this.title = typeof title === 'undefined' ? this.title : title;
     this.callback = typeof callback === 'undefined' ? this.callback : callback;
 
     const categoryKeys = Object.keys(this.categories)
@@ -77,7 +85,7 @@ export default class extends Chart {
       .map(d => parseInt(d, 10));
 
     const margin = {
-      top: 20,
+      top: 30,
       right: 20,
       bottom: this.containerWidth / 20,
       left: this.containerWidth / 20,
@@ -177,6 +185,14 @@ export default class extends Chart {
         this.tooltip.style('visibility', 'hidden');
       });
 
+    this.titleHeader
+      .attr('x', width / 2)
+      .attr('y', -margin.top / 2)
+      .attr('text-anchor', 'middle')
+      .style('dominant-baseline', 'central')
+      .style('font-size', `${margin.top > MAX_FONT_SIZE ? MAX_FONT_SIZE : margin.top}px`)
+      .text(this.title);
+
     const point = this.memory.selectAll('circle')
       .data(this.values, d => `${d[0]}:${d[1]}:${d[2]}`);
 
@@ -191,7 +207,7 @@ export default class extends Chart {
       .attr('dx', d => x(d[0]))
       .attr('dy', d => y(d[1]))
       .attr('data-z', d => d[2])
-      .attr('r', Math.ceil(width / 200))
+      .attr('r', Math.ceil(width / 150))
       .attr('fillStyle', d => color(d[2]))
       .attr('title', d => `
 ${d[0]}</br>
@@ -200,6 +216,9 @@ ${!categoryKeys ? d[2] : this.categories[d[2]]}</br>
 `);
 
     point.exit()
+      .transition()
+      .duration(ANIMATION_DURATION)
+      .attr('r', 0)
       .remove();
 
     function wrap(nodes, maxWidth) {
@@ -302,6 +321,8 @@ ${!categoryKeys ? d[2] : this.categories[d[2]]}</br>
           );
           ctx.fillStyle = node.getAttribute('fillStyle');
           ctx.fill();
+          ctx.strokeStyle = '#fff';
+          ctx.stroke();
         });
       }, 0);
       if (elapsed > ANIMATION_DURATION * 2 || _skipAnimation) {
