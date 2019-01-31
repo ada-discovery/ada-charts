@@ -206,7 +206,7 @@ export default class extends Chart {
       .delay((_, i) => i * (ANIMATION_DURATION / this.values.length))
       .attr('dx', d => x(d[0]))
       .attr('dy', d => y(d[1]))
-      .attr('data-z', d => d[2])
+      .attr('data-category', d => d[2])
       .attr('r', Math.ceil(width / 150))
       .attr('fillStyle', d => color(d[2]))
       .attr('title', d => `
@@ -302,7 +302,6 @@ ${!categoryKeys ? d[2] : this.categories[d[2]]}</br>
       .remove();
 
     const nodes = this.memory.selectAll('circle')
-      .filter(d => typeof _selectedCategory === 'undefined' || d[2] === _selectedCategory)
       .nodes();
 
     const ctx = this.canvas.node().getContext('2d');
@@ -319,6 +318,11 @@ ${!categoryKeys ? d[2] : this.categories[d[2]]}</br>
             2 * Math.PI,
             false,
           );
+          ctx.globalAlpha = 1;
+          if (typeof _selectedCategory !== 'undefined'
+            && parseInt(node.getAttribute('data-category'), 10) !== _selectedCategory) {
+            ctx.globalAlpha = 0.2;
+          }
           ctx.fillStyle = node.getAttribute('fillStyle');
           ctx.fill();
           ctx.strokeStyle = '#fff';
