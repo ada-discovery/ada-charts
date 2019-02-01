@@ -48,10 +48,6 @@ export default class extends Chart {
     return 'heatmap';
   }
 
-  prepareSVGForCapture() {
-    return this.svg;
-  }
-
   prepareValues({ values, rows, cols }) {
     this.data = [];
     rows.forEach((row, i) => {

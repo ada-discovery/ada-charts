@@ -22,8 +22,10 @@ export default class {
     this.render(args);
   }
 
-  prepareSVGForCapture() {
-    throw Error('prepareSVGForCapture() not implemented.');
+  captureSetup() {
+  }
+
+  captureTeardown() {
   }
 
   get containerWidth() {
@@ -35,6 +37,7 @@ export default class {
   }
 
   toPNG() {
+    this.captureSetup();
     html2canvas(this.container).then((canvas) => {
       const img = canvas.toDataURL('image/png');
       const a = document.createElement('a');
@@ -43,6 +46,7 @@ export default class {
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
+      this.captureTeardown();
     });
   }
 }
