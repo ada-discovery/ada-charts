@@ -4,6 +4,7 @@ import '../../assets/css/scatterplot.css';
 
 const ANIMATION_DURATION = 500;
 const MAX_FONT_SIZE = 20;
+const D3_AXIS_TEXT_OFFSET = 9;
 
 export default class extends Chart {
   constructor({ container }) {
@@ -128,6 +129,7 @@ export default class extends Chart {
 
     const tooltipOffset = width / 100;
     const yLabelSize = (margin.left / 5) > MAX_FONT_SIZE ? MAX_FONT_SIZE : (margin.left / 5);
+    const xLabelSize = yLabelSize;
     const padding = width / 40;
 
     const x = d3.scaleLinear()
@@ -185,7 +187,6 @@ export default class extends Chart {
       .tickFormat('');
 
     function axisWrap(nodes, maxWidth) {
-      const D3_AXIS_TEXT_OFFSET = 9;
       nodes.each(function () {
         const text = d3.select(this);
         while (text.node().getComputedTextLength() > maxWidth - D3_AXIS_TEXT_OFFSET) {
@@ -255,8 +256,8 @@ export default class extends Chart {
     this.xLabel
       .attr('text-anchor', 'middle')
       .style('dominant-baseline', 'central')
-      .style('font-size', MAX_FONT_SIZE)
-      .attr('transform', `translate(${width / 2}, ${height + margin.bottom - MAX_FONT_SIZE / 2})`)
+      .style('font-size', xLabelSize)
+      .attr('transform', `translate(${width / 2}, ${height + margin.bottom - xLabelSize / 2})`)
       .text(this.xAxisLabel);
 
 
