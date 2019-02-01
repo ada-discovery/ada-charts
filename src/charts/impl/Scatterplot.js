@@ -87,8 +87,12 @@ export default class extends Chart {
     return 'scatterplot';
   }
 
-  prepareSVGForCapture() {
-    return this.svg;
+  captureSetup() {
+
+  }
+
+  captureTeardown() {
+
   }
 
   render({
@@ -145,12 +149,16 @@ export default class extends Chart {
     }
 
     this.foreignObject
-      .attr('x', margin.x)
-      .attr('y', margin.y)
       .attr('width', width)
-      .attr('height', height);
+      .attr('height', height)
+      .style('position', 'relative')
+      .style('z-index', -1)
+      .style('padding-left', margin.left)
+      .style('padding-top', margin.top);
 
     this.foreignBody
+      .style('position', 'relative')
+      .style('z-index', -1)
       .style('width', `${width}px`)
       .style('height', `${height}px`);
 
