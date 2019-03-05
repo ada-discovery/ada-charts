@@ -82,6 +82,9 @@ export default class extends Chart {
     this.yAxisLabel = '';
     this.callback = () => {};
     this.colorToTooltipMap = {};
+
+    this.width = 0;
+    this.height = 0;
   }
 
   static get name() {
@@ -89,11 +92,14 @@ export default class extends Chart {
   }
 
   captureSetup() {
-
+    this.tmpImage = this.svg.insert('image', ':first-child')
+      .attr('width', this.width)
+      .attr('height', this.height)
+      .attr('xlink:href', this.canvas.node().toDataURL('image/png'));
   }
 
   captureTeardown() {
-
+    this.tmpImage.remove();
   }
 
   render({
@@ -126,6 +132,8 @@ export default class extends Chart {
 
     const width = this.containerWidth - margin.left - margin.right;
     const height = this.containerWidth - margin.top - margin.bottom;
+    this.width = width;
+    this.height = height;
 
     const tooltipOffset = width / 100;
     const yLabelSize = (margin.left / 5) > MAX_FONT_SIZE ? MAX_FONT_SIZE : (margin.left / 5);
