@@ -48,6 +48,20 @@ export default class extends Chart {
     return 'heatmap';
   }
 
+  captureSetup() {
+    this.canvas.style('display', 'hidden');
+    this.captureImage = this.svg.insert('image', ':first-child')
+      .attr('width', this.width)
+      .attr('height', this.height)
+      .attr('xlink:href', this.canvas.node().toDataURL('image/png'));
+  }
+
+  captureTeardown() {
+    this.canvas.style('display', 'visible');
+    this.captureImage.node().parentNode.removeChild(this.captureImage.node());
+    this.render({});
+  }
+
   prepareValues({ values, rows, cols }) {
     this.data = [];
     rows.forEach((row, i) => {

@@ -92,14 +92,17 @@ export default class extends Chart {
   }
 
   captureSetup() {
-    this.tmpImage = this.svg.insert('image', ':first-child')
+    this.canvas.style('display', 'hidden');
+    this.captureImage = this.svg.insert('image', ':first-child')
       .attr('width', this.width)
       .attr('height', this.height)
       .attr('xlink:href', this.canvas.node().toDataURL('image/png'));
   }
 
   captureTeardown() {
-    this.tmpImage.remove();
+    this.canvas.style('display', 'visible');
+    this.captureImage.node().parentNode.removeChild(this.captureImage.node());
+    this.render({});
   }
 
   render({

@@ -49,25 +49,49 @@ export default class {
     return this.container.getBoundingClientRect().height || this.containerWidth;
   }
 
-  async toPNG() {
+  offerDownload(href, type) {
+    const a = document.createElement('a');
+    a.href = href;
+    a.download = `capture.${type}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  toPNG() {
     this.captureSetup();
+    const element = this.prepareCaptureElement();
+    html2canvas(element.parentNode).then((canvas) => {
+      const img = canvas.toDataURL('image/png');
+      this.offerDownload(img, 'png');
+      this.captureTeardown();
+    });
+  }
+
+  toSVG() {
+    this.captureSetup();
+    const element = this.prepareCaptureElement();
+    const svgBlob = new Blob([element.outerHTML], { type: 'image/svg+xml;charset=utf-8' });
+    const svgUrl = URL.createObjectURL(svgBlob);
+    this.offerDownload(svgUrl, 'svg');
+    this.captureTeardown();
+  }
+
+  prepareCaptureElement() {
     const svgElement = this.container.querySelector('svg');
     svgElement.setAttribute('version', '1.1');
     svgElement.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
     svgElement.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
     const cssRules = this.collectCSSRules();
-    const defs = `<defs><style type="text/css"><![CDATA[${cssRules.join('')}]]></style></defs>`;
-    svgElement.innerHTML += defs;
-
-    html2canvas(this.container).then((canvas) => {
-      const img = canvas.toDataURL('image/png');
-      const a = document.createElement('a');
-      a.href = img;
-      a.download = 'capture.png';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      this.captureTeardown();
-    });
+    const defs = svgElement.querySelector('defs');
+    if (defs != null) { defs.remove(); }
+    const newDefs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    const style = document.createElement('style');
+    style.type = 'text/css';
+    const cdata = document.createTextNode(cssRules.join(''));
+    style.appendChild(cdata);
+    newDefs.appendChild(style);
+    svgElement.appendChild(newDefs);
+    return svgElement;
   }
 }

@@ -10,6 +10,7 @@
         <span>API examples:</span>
         <button onclick="update()">update()</button>
         <button onclick="toPNG()">toPNG()</button>
+        <button onclick="toSVG()">toSVG()</button>
     </div>
     <div id="scatterplot-container"></div>
 </body>
@@ -40,7 +41,7 @@
 
   function update() {
     scatterplot.update({
-      values: generateRandomData(2000, -10000, 10000),
+      values: generateRandomData(500, -10000, 10000),
       categories: { name: 'Gender', 0: 'male', 1: 'female', 2: 'N/A'},
       title: 'Scatterplot',
       xAxisLabel: 'X Axis Values',
@@ -51,6 +52,10 @@
 
   function toPNG() {
     scatterplot.toPNG();
+  }
+
+  function toSVG() {
+    scatterplot.toSVG();
   }
 
   document.addEventListener('DOMContentLoaded', update, false);

@@ -10,6 +10,7 @@
     <span>API examples:</span>
     <button onclick="update()">update()</button>
     <button onclick="toPNG()">toPNG()</button>
+    <button onclick="toSVG()">toSVG()</button>
     <button onclick="highlight()">highlight()</button>
 </div>
 <div id="heatmap-container"></div>
@@ -67,6 +68,10 @@
 
   function toPNG() {
     heatmap.toPNG();
+  }
+
+  function toSVG() {
+    heatmap.toSVG();
   }
 
   function update() {
