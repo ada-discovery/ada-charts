@@ -27,13 +27,8 @@ module.exports = (env, argv) => ({
         ],
       },
       {
-        test: /\.(woff2?|ttf)$/,
-        exclude: /node_modules/,
-        loader: 'base64-inline-loader',
-        options: {
-          limit: 1000,
-          name: '[name].[ext]',
-        },
+        test: /\.(png|woff|woff2|eot|ttf|svg)$/,
+        loader: 'url-loader',
       },
     ],
   },

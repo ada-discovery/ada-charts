@@ -33,9 +33,7 @@ export default class {
     for (let i = 0; i < document.styleSheets.length; i += 1) {
       const sheet = document.styleSheets[i];
       Object.keys(sheet.cssRules).forEach((key) => {
-        if (sheet.cssRules[key] instanceof CSSStyleRule) {
-          rules.push(sheet.cssRules[key].cssText);
-        }
+        rules.push(sheet.cssRules[key].cssText);
       });
     }
     return rules;

@@ -14,7 +14,7 @@ export default class extends Chart {
     this.hiddenCanvas = document.createElement('canvas');
     this.svg = d3.select(container)
       .append('svg')
-      .attr('class', 'ac-scatter-svg')
+      .attr('class', 'ac-scatter-svg ada-chart')
       .append('g');
 
     this.tooltip = d3.select(container)

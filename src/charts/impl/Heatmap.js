@@ -15,7 +15,9 @@ export default class extends Chart {
     this.canvas = d3.select(container)
       .append('canvas')
       .attr('class', 'ac-heatmap-canvas');
-    this.svg = d3.select(container).append('svg')
+    this.svg = d3.select(container)
+      .append('svg')
+      .attr('class', 'ada-chart')
       .append('g');
     this.vertHL = d3.select(container)
       .append('div')
