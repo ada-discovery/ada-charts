@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Barplot</title>
+    <script src="http://localhost:8080/ada-charts.js"></script>
+</head>
+<body>
+<div id="barplot-controls">
+    <span>API examples:</span>
+    <button onclick="update()">update()</button>
+</div>
+<div id="barplot-container"></div>
+</body>
+</html>
+
+<script>
+
+  /**
+   * Helper function. Do not copy
+   */
+
+
+  /**
+   * API Documentation below this point
+   */
+  const container = document.querySelector('#barplot-container');
+  const barplot = AdaCharts.chart({ chartType: 'barplot', container });
+
+  function update() {
+    barplot.update({
+      title: "Gender by Site ID",
+      categories: [ "Undefined", "Female", "Male" ],
+      series: [
+        {
+          "name": "CHEM",
+          "data": [
+            { "name": "Undefined", "y": 0 },
+            { "name": "Female", "y": 27, "key": "2" },
+            { "name": "Male", "y": 40, "key": "1"}
+          ],
+          "colorByPoint": false
+        },
+        {
+          "name": "CHL",
+          "data": [
+            { "name": "Undefined", "y": 0 },
+            { "name": "Female", "y": 437, "key": "2" },
+            { "name": "Male", "y": 710, "key": "1" }
+          ],
+          "colorByPoint": false
+        },
+        {
+          "name": "Flying Team",
+          "data": [
+            { "name": "Undefined", "y": 0 },
+            { "name": "Female", "y": 15, "key": "2" },
+            { "name": "Male", "y": 26, "key": "1" }
+          ],
+          "colorByPoint": false
+        },
+        {
+          "name": "La Tulipe",
+          "data": [
+            { "name": "Undefined", "y": 0 },
+            { "name": "Female", "y": 3, "key": "2" },
+            { "name": "Male", "y": 30, "key": "1" }
+          ],
+          "colorByPoint": false
+        },
+        {
+          "name": "CIEC (discontinued; use CHL instead)",
+          "data": [
+            { "name": "Undefined", "y": 0 },
+            { "name": "Female", "y": 435, "key": "2" },
+            { "name": "Male", "y": 394, "key": "1" }
+          ],
+          "colorByPoint": false
+        },
+        {
+          "name": "Undefined",
+          "data": [
+            { "name": "Undefined", "y": 9 },
+            { "name": "Female", "y": 3, "key": "2" },
+            { "name": "Male", "y": 0, "key": "1" }
+          ],
+          "colorByPoint": false
+        }
+      ],
+      inverted: false,
+      xAxisCaption: null,
+      yAxisCaption: "Count",
+      showLabels: true,
+      showLegend: true
+    });
+  }
+
+  function toPNG() {
+    barplot.toPNG();
+  }
+
+  function toSVG() {
+    barplot.toSVG();
+  }
+
+  document.addEventListener('DOMContentLoaded', update, false);
+</script>
+
+<style>
+    body {
+        display: flex;
+        flex-direction: row;
+    }
+
+    #barplot-controls {
+        display: flex;
+        flex-direction: column;
+    }
+
+    #barplot-container {
+        width: 50vw;
+    }
+</style>
