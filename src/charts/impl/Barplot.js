@@ -17,10 +17,23 @@ export default class extends Chart {
   }
 
   render({
-    title,
-    categories,
-    series
-  }) {
+           title,
+           categories,
+           series,
+         }) {
+
+    const groups = series.map(d => d.name);
+    const data = [];
+    series.forEach((d) => {
+      d.data.forEach((e) => {
+        e.category = e.name;
+        e.group = d.name;
+        delete e.name;
+        delete e.key;
+        data.push(e);
+      });
+    });
+
     const margin = {
       top: this.containerWidth / 15,
       right: this.containerWidth / 15,
@@ -35,7 +48,9 @@ export default class extends Chart {
       .attr('width', width + margin.left + margin.right)
       .attr('height', height + margin.top + margin.bottom);
 
-    const innerPadding = width / 20;
+    this.svg.attr('transform', `translate(${margin.left}, ${margin.top})`);
+
+    const innerPadding = 0;
     const outerPadding = innerPadding;
     const x = d3.scaleBand()
       .domain(categories)
@@ -43,11 +58,12 @@ export default class extends Chart {
       .paddingInner(innerPadding)
       .paddingOuter(outerPadding);
 
-    const ys = series
-      .reduce((prev, curr) => prev.concat(curr.data), [])
-      .map(d => d.y);
+    const xSub = d3.scaleBand()
+      .domain(groups)
+      .range([0, x.bandwidth()]);
+
     const y = d3.scaleLinear()
-      .domain(d3.extent(ys))
+      .domain(d3.extent(data.map(d => d.y)))
       .range([height, 0]);
 
     const barGroup = this.svg.selectAll('.bar-group')
@@ -56,6 +72,24 @@ export default class extends Chart {
     barGroup.enter()
       .append('g')
       .attr('class', 'bar-group')
-      .x(d => x(d));
+      .merge(barGroup)
+      .attr('transform', d => `translate(${x(d)}, 0)`);
+
+    barGroup.exit()
+      .remove();
+
+    const bar = this.svg.selectAll('.bar-group').selectAll('rect')
+      .data(category => data.filter(d => d.category === category));
+
+    bar.enter()
+      .append('rect')
+      .merge(bar)
+      .attr('x', d => xSub(d.group))
+      .attr('y', d => y(d.y))
+      .attr('width', xSub.bandwidth())
+      .attr('height', d => height - y(d.y));
+
+    bar.exit()
+      .remove();
   }
 }
