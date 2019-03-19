@@ -34,6 +34,10 @@ export default class extends Chart {
       });
     });
 
+    const color = d3.scaleOrdinal()
+      .domain(groups)
+      .range(d3.schemeSet3);
+
     const margin = {
       top: this.containerWidth / 15,
       right: this.containerWidth / 15,
@@ -87,9 +91,23 @@ export default class extends Chart {
       .attr('x', d => xSub(d.group))
       .attr('y', d => y(d.y))
       .attr('width', xSub.bandwidth())
-      .attr('height', d => height - y(d.y));
+      .attr('height', d => height - y(d.y))
+      .attr('fill', d => color(d.group));
 
     bar.exit()
+      .remove();
+
+    const text = this.svg.selectAll('.bar-group').selectAll('text')
+      .data(category => data.filter(d => d.category === category));
+
+    text.enter()
+      .append('text')
+      .merge(text)
+      .attr('text-anchor', 'middle')
+      .attr('transform', d => `translate(${xSub(d.group) + xSub.bandwidth() / 2}, ${y(d.y)})`)
+      .text(d => d.y);
+
+    text.exit()
       .remove();
   }
 }
