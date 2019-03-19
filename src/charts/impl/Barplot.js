@@ -10,6 +10,18 @@ export default class extends Chart {
       .append('svg')
       .attr('class', 'ac-box-svg ada-chart')
       .append('g');
+
+    this.axisBottom = this.svg
+      .append('g')
+      .attr('class', 'ac-bar-bottom-axis ac-bar-axis');
+
+    this.axisLeft = this.svg
+      .append('g')
+      .attr('class', 'ac-bar-left-axis ac-bar-axis');
+
+    this.axisRight = this.svg
+      .append('g')
+      .attr('class', 'ac-bar-right-axis ac-bar-axis');
   }
 
   static get name() {
@@ -17,11 +29,10 @@ export default class extends Chart {
   }
 
   render({
-           title,
-           categories,
-           series,
-         }) {
-
+    title,
+    categories,
+    series,
+  }) {
     const groups = series.map(d => d.name);
     const data = [];
     series.forEach((d) => {
@@ -54,13 +65,11 @@ export default class extends Chart {
 
     this.svg.attr('transform', `translate(${margin.left}, ${margin.top})`);
 
-    const innerPadding = 0;
-    const outerPadding = innerPadding;
     const x = d3.scaleBand()
       .domain(categories)
       .range([0, width])
-      .paddingInner(innerPadding)
-      .paddingOuter(outerPadding);
+      .paddingInner(0.1)
+      .paddingOuter(0.05);
 
     const xSub = d3.scaleBand()
       .domain(groups)
@@ -70,19 +79,31 @@ export default class extends Chart {
       .domain(d3.extent(data.map(d => d.y)))
       .range([height, 0]);
 
-    const barGroup = this.svg.selectAll('.bar-group')
+    this.axisBottom
+      .attr('transform', `translate(0, ${height})`)
+      .call(d3.axisBottom(x));
+
+    this.axisLeft
+      .attr('transform', `translate(${0}, ${0})`)
+      .call(d3.axisLeft(y));
+
+    this.axisRight
+      .attr('transform', `translate(${width}, ${0})`)
+      .call(d3.axisLeft(y).tickSizeInner(width).tickFormat(''));
+
+    const barGroup = this.svg.selectAll('.ac-bar-group')
       .data(categories);
 
     barGroup.enter()
       .append('g')
-      .attr('class', 'bar-group')
+      .attr('class', 'ac-bar-group')
       .merge(barGroup)
       .attr('transform', d => `translate(${x(d)}, 0)`);
 
     barGroup.exit()
       .remove();
 
-    const bar = this.svg.selectAll('.bar-group').selectAll('rect')
+    const bar = this.svg.selectAll('.ac-bar-group').selectAll('rect')
       .data(category => data.filter(d => d.category === category));
 
     bar.enter()
@@ -97,14 +118,14 @@ export default class extends Chart {
     bar.exit()
       .remove();
 
-    const text = this.svg.selectAll('.bar-group').selectAll('text')
+    const text = this.svg.selectAll('.ac-bar-group').selectAll('text')
       .data(category => data.filter(d => d.category === category));
 
     text.enter()
       .append('text')
       .merge(text)
       .attr('text-anchor', 'middle')
-      .attr('transform', d => `translate(${xSub(d.group) + xSub.bandwidth() / 2}, ${y(d.y)})`)
+      .attr('transform', d => `translate(${xSub(d.group) + xSub.bandwidth() / 2}, ${y(d.y) - 1})`)
       .text(d => d.y);
 
     text.exit()

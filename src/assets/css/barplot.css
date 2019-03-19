@@ -1,0 +1,19 @@
+.ac-bar-axis path {
+    stroke: #d6d6d6;
+}
+
+.ac-bar-left-axis path {
+    stroke: none;
+}
+
+.ac-bar-left-axis .tick line {
+    stroke: none;
+}
+
+.ac-bar-right-axis path {
+    stroke: none;
+}
+
+.ac-bar-right-axis .tick line {
+    stroke: #d6d6d6;
+}
