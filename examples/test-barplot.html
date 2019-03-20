@@ -22,6 +22,46 @@
    * Helper function. Do not copy
    */
 
+  function generateRandomData() {
+    const rng = Math.random();
+    const numCategories = Math.floor(Math.random() * 9 + 1);
+    const numGroups = Math.floor(Math.random() * 9 + 1);
+
+    const categories = [];
+    for (let i = 0; i < numCategories; i += 1) {
+      categories.push(String.fromCharCode(65 + i));
+    }
+
+    const groups = [];
+    for (let i = 0; i < numGroups; i += 1) {
+      groups.push(String.fromCharCode(97 + i));
+    }
+
+    const series = [];
+    groups.forEach(group => {
+      series.push({
+        name: group,
+        data: categories.map(category => {
+          return {
+            name: category,
+            y: Math.floor(Math.random() * 10000)
+          }
+        })
+      });
+    });
+    // if (rng < 0.33) { // contains only negative
+    //
+    // } else if (rng >= 0.33 && rng < 0.66) { // contains only positive
+    //
+    // } else { // contains negative and positive
+    //
+    // }
+    return {
+      groups,
+      categories,
+      series
+    };
+  }
 
   /**
    * API Documentation below this point
@@ -30,71 +70,12 @@
   const barplot = AdaCharts.chart({ chartType: 'barplot', container });
 
   function update() {
+    const randomData = generateRandomData();
     barplot.update({
-      title: "Gender by Site ID",
-      categories: [ "Undefined", "Female", "Male" ],
+      title: "Random generated example",
+      categories: randomData.categories,
       barClickCallback: d => console.log(d),
-      series: [
-        {
-          "name": "CHEM",
-          "data": [
-            { "name": "Undefined", "y": 0 },
-            { "name": "Female", "y": 27, "key": "2" },
-            { "name": "Male", "y": 40, "key": "1"}
-          ],
-          "colorByPoint": false
-        },
-        {
-          "name": "CHL",
-          "data": [
-            { "name": "Undefined", "y": 0 },
-            { "name": "Female", "y": 437, "key": "2" },
-            { "name": "Male", "y": 710, "key": "1" }
-          ],
-          "colorByPoint": false
-        },
-        {
-          "name": "Flying Team",
-          "data": [
-            { "name": "Undefined", "y": 0 },
-            { "name": "Female", "y": 15, "key": "2" },
-            { "name": "Male", "y": 26, "key": "1" }
-          ],
-          "colorByPoint": false
-        },
-        {
-          "name": "La Tulipe",
-          "data": [
-            { "name": "Undefined", "y": 0 },
-            { "name": "Female", "y": 3, "key": "2" },
-            { "name": "Male", "y": 30, "key": "1" }
-          ],
-          "colorByPoint": false
-        },
-        {
-          "name": "CIEC (discontinued; use CHL instead)",
-          "data": [
-            { "name": "Undefined", "y": 0 },
-            { "name": "Female", "y": 435, "key": "2" },
-            { "name": "Male", "y": 394, "key": "1" }
-          ],
-          "colorByPoint": false
-        },
-        {
-          "name": "Undefined",
-          "data": [
-            { "name": "Undefined", "y": 9 },
-            { "name": "Female", "y": 3, "key": "2" },
-            { "name": "Male", "y": 0, "key": "1" }
-          ],
-          "colorByPoint": false
-        }
-      ],
-      inverted: false,
-      xAxisCaption: null,
-      yAxisCaption: "Count",
-      showLabels: true,
-      showLegend: true
+      series: randomData.series,
     });
   }
 
