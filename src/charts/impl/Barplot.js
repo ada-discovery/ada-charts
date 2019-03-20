@@ -11,6 +11,12 @@ export default class extends Chart {
       .attr('class', 'ac-box-svg ada-chart')
       .append('g');
 
+    this.title = this.svg
+      .append('text')
+      .attr('text-anchor', 'middle')
+      .style('dominant-baseline', 'central')
+      .attr('class', 'ac-bar-title');
+
     this.axisBottom = this.svg
       .append('g')
       .attr('class', 'ac-bar-bottom-axis ac-bar-axis');
@@ -64,6 +70,10 @@ export default class extends Chart {
       .attr('height', height + margin.top + margin.bottom);
 
     this.svg.attr('transform', `translate(${margin.left}, ${margin.top})`);
+
+    this.title
+      .attr('transform', `translate(${width / 2}, ${-margin.top / 2})`)
+      .text(title);
 
     const x = d3.scaleBand()
       .domain(categories)
