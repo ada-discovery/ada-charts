@@ -38,6 +38,7 @@ export default class extends Chart {
     title,
     categories,
     series,
+    barClickCallback,
   }) {
     const groups = series.map(d => d.name);
     const data = [];
@@ -118,11 +119,12 @@ export default class extends Chart {
 
     bar.enter()
       .append('rect')
+      .on('click', d => barClickCallback(d))
       .merge(bar)
       .attr('x', d => xSub(d.group))
-      .attr('y', d => y(d.y))
+      .attr('y', d => y(d.y) - 2)
       .attr('width', xSub.bandwidth())
-      .attr('height', d => height - y(d.y))
+      .attr('height', d => height - y(d.y) + 2)
       .attr('fill', d => color(d.group));
 
     bar.exit()
@@ -135,7 +137,7 @@ export default class extends Chart {
       .append('text')
       .merge(text)
       .attr('text-anchor', 'middle')
-      .attr('transform', d => `translate(${xSub(d.group) + xSub.bandwidth() / 2}, ${y(d.y) - 1})`)
+      .attr('transform', d => `translate(${xSub(d.group) + xSub.bandwidth() / 2}, ${y(d.y) - 4})`)
       .text(d => d.y);
 
     text.exit()

@@ -31,6 +31,7 @@
     barplot.update({
       title: "Gender by Site ID",
       categories: [ "Undefined", "Female", "Male" ],
+      barClickCallback: d => console.log(d),
       series: [
         {
           "name": "CHEM",
