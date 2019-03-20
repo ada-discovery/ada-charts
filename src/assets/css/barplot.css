@@ -6,11 +6,17 @@
 }
 
 .ac-bar-group rect:hover {
-    opacity: 0.6;
+    stroke: #f00;
+}
+
+.ac-bar-legend-element {
+    cursor: pointer;
 }
 
 .ac-bar-axis path {
     stroke: #d6d6d6;
+    stroke-width: 1px;
+    shape-rendering: crispEdges;
 }
 
 .ac-bar-left-axis path {
@@ -27,4 +33,6 @@
 
 .ac-bar-right-axis .tick line {
     stroke: #d6d6d6;
+    stroke-width: 1px;
+    shape-rendering: crispEdges;
 }

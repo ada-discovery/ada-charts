@@ -39,6 +39,7 @@ export default class extends Chart {
     categories,
     series,
     barClickCallback,
+    legendClickCallback,
   }) {
     const groups = series.map(d => d.name);
     const data = [];
@@ -58,7 +59,7 @@ export default class extends Chart {
 
     const margin = {
       top: this.containerWidth / 15,
-      right: this.containerWidth / 15,
+      right: this.containerWidth / 5,
       bottom: this.containerWidth / 15,
       left: this.containerWidth / 15,
     };
@@ -102,45 +103,98 @@ export default class extends Chart {
       .attr('transform', `translate(${width}, ${0})`)
       .call(d3.axisLeft(y).tickSizeInner(width).tickFormat(''));
 
-    const barGroup = this.svg.selectAll('.ac-bar-group')
+    const barCollection = this.svg.selectAll('.ac-bar-collection')
       .data(categories);
 
-    barGroup.enter()
+    barCollection.enter()
+      .append('g')
+      .attr('class', 'ac-bar-collection')
+      .merge(barCollection)
+      .attr('transform', d => `translate(${x(d)}, 0)`);
+
+    barCollection.exit()
+      .remove();
+
+    const barGroup = this.svg.selectAll('.ac-bar-collection').selectAll('.ac-bar-group')
+      .data(category => data.filter(d => d.category === category));
+
+    const barGroupEnter = barGroup.enter()
       .append('g')
       .attr('class', 'ac-bar-group')
       .merge(barGroup)
-      .attr('transform', d => `translate(${x(d)}, 0)`);
+      .on('click', d => barClickCallback(d))
+      .on('mouseenter', (d) => {
+        this.svg.selectAll('.ac-bar-group')
+          .filter(e => d.group !== e.group)
+          .style('opacity', 0.2);
+      })
+      .on('mouseleave', () => {
+        this.svg.selectAll('.ac-bar-group')
+          .style('opacity', 1);
+      });
 
     barGroup.exit()
       .remove();
 
-    const bar = this.svg.selectAll('.ac-bar-group').selectAll('rect')
-      .data(category => data.filter(d => d.category === category));
-
-    bar.enter()
-      .append('rect')
-      .on('click', d => barClickCallback(d))
-      .merge(bar)
+    barGroupEnter.append('rect')
       .attr('x', d => xSub(d.group))
       .attr('y', d => y(d.y) - 2)
       .attr('width', xSub.bandwidth())
       .attr('height', d => height - y(d.y) + 2)
       .attr('fill', d => color(d.group));
 
-    bar.exit()
-      .remove();
-
-    const text = this.svg.selectAll('.ac-bar-group').selectAll('text')
-      .data(category => data.filter(d => d.category === category));
-
-    text.enter()
-      .append('text')
-      .merge(text)
+    barGroupEnter.append('text')
       .attr('text-anchor', 'middle')
       .attr('transform', d => `translate(${xSub(d.group) + xSub.bandwidth() / 2}, ${y(d.y) - 4})`)
       .text(d => d.y);
 
-    text.exit()
+    const legendElementSize = height / 30;
+
+    const legend = this.svg.selectAll('.ac-bar-legend-element')
+      .data(groups);
+
+    const selectedGroups = [];
+    const legendEnter = legend.enter()
+      .append('g')
+      .attr('class', 'ac-bar-legend-element')
+      .merge(legend)
+      .attr('transform', (d, i) => `translate(${width + legendElementSize}, ${(legendElementSize + legendElementSize / 2) * i})`)
+      .on('click', (group) => {
+        this.svg.selectAll('.ac-bar-group')
+          .style('opacity', 1);
+        this.svg.selectAll('.ac-bar-legend-element')
+          .style('opacity', 1);
+        const idx = selectedGroups.indexOf(group);
+        if (idx >= 0) {
+          selectedGroups.splice(idx, 1);
+        } else {
+          selectedGroups.push(group);
+        }
+
+        if (selectedGroups.length) {
+          this.svg.selectAll('.ac-bar-group')
+            .filter(d => !selectedGroups.includes(d.group))
+            .style('opacity', 0.2);
+          this.svg.selectAll('.ac-bar-legend-element')
+            .filter(d => !selectedGroups.includes(d))
+            .style('opacity', 0.2);
+        }
+      });
+
+    legend.exit()
       .remove();
+
+    legendEnter
+      .append('rect')
+      .attr('width', legendElementSize)
+      .attr('height', legendElementSize)
+      .attr('fill', color);
+
+    legendEnter
+      .append('text')
+      .attr('text-anchor', 'start')
+      .style('dominant-baseline', 'central')
+      .attr('transform', `translate(${legendElementSize + 2}, ${legendElementSize / 2})`)
+      .text(d => d);
   }
 }
