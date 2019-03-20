@@ -79,7 +79,7 @@ export default class extends Chart {
     const x = d3.scaleBand()
       .domain(categories)
       .range([0, width])
-      .paddingInner(0.1)
+      .paddingInner(0.15)
       .paddingOuter(0.05);
 
     const xSub = d3.scaleBand()

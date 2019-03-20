@@ -19,6 +19,10 @@
     shape-rendering: crispEdges;
 }
 
+.ac-bar-axis {
+    font-size: 1em;
+}
+
 .ac-bar-left-axis path {
     stroke: none;
 }
