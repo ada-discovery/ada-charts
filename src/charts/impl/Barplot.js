@@ -39,7 +39,6 @@ export default class extends Chart {
     categories,
     series,
     barClickCallback,
-    legendClickCallback,
   }) {
     const groups = series.map(d => d.name);
     const data = [];
@@ -58,7 +57,7 @@ export default class extends Chart {
       .range(d3.schemeSet3);
 
     const margin = {
-      top: this.containerWidth / 15,
+      top: this.containerWidth / 12,
       right: this.containerWidth / 5,
       bottom: this.containerWidth / 15,
       left: this.containerWidth / 15,
@@ -160,25 +159,26 @@ export default class extends Chart {
       .merge(legend)
       .attr('transform', (d, i) => `translate(${width + legendElementSize}, ${(legendElementSize + legendElementSize / 2) * i})`)
       .on('click', (group) => {
-        this.svg.selectAll('.ac-bar-group')
-          .style('opacity', 1);
-        this.svg.selectAll('.ac-bar-legend-element')
-          .style('opacity', 1);
         const idx = selectedGroups.indexOf(group);
         if (idx >= 0) {
           selectedGroups.splice(idx, 1);
         } else {
           selectedGroups.push(group);
         }
-
-        if (selectedGroups.length) {
-          this.svg.selectAll('.ac-bar-group')
-            .filter(d => !selectedGroups.includes(d.group))
-            .style('opacity', 0.2);
-          this.svg.selectAll('.ac-bar-legend-element')
-            .filter(d => !selectedGroups.includes(d))
-            .style('opacity', 0.2);
-        }
+        this.svg.selectAll('.ac-bar-group')
+          .each((d, i, arr) => {
+            d3.select(arr[i])
+              .transition()
+              .duration(500)
+              .style('opacity', selectedGroups.length === 0 || selectedGroups.includes(d.group) ? 1 : 0.2);
+          });
+        this.svg.selectAll('.ac-bar-legend-element')
+          .each((d, i, arr) => {
+            d3.select(arr[i])
+              .transition()
+              .duration(500)
+              .style('opacity', selectedGroups.length === 0 || selectedGroups.includes(d) ? 1 : 0.2);
+          });
       });
 
     legend.exit()
