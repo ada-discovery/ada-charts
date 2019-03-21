@@ -128,7 +128,7 @@ export default class extends Chart {
           .attr('x', d => xSub(d.group))
           .attr('y', height)
           .transition()
-          .duration(1000)
+          .duration(500)
           .attr('x', d => xSub(d.group))
           .attr('y', d => y(d.y) - 2)
           .attr('width', xSub.bandwidth())
@@ -148,7 +148,7 @@ export default class extends Chart {
         this.svg.selectAll('.ac-bar-group')
           .filter(e => d.group !== e.group)
           .transition()
-          .duration(1000)
+          .duration(500)
           .style('opacity', 0.2);
         this.svg.selectAll('.ac-bar-group')
           .filter(e => d.group === e.group)
@@ -159,20 +159,20 @@ export default class extends Chart {
       })
       .on('mouseleave', () => {
         this.svg.selectAll('.ac-bar-group')
-          .transition()
-          .duration(1000)
-          .style('opacity', 1)
           .call((parent) => {
             parent.select('text')
               .style('visibility', 'hidden');
-          });
+          })
+          .transition()
+          .duration(500)
+          .style('opacity', 1);
       });
 
     barGroup
       .call((parent) => {
         parent.select('rect')
           .transition()
-          .duration(1000)
+          .duration(500)
           .attr('x', d => xSub(d.group))
           .attr('y', d => y(d.y) - 2)
           .attr('width', xSub.bandwidth())
@@ -194,7 +194,7 @@ export default class extends Chart {
           .remove();
       })
       .transition()
-      .delay(1000)
+      .delay(500)
       .remove();
 
     const legendElementSize = height / 30;
@@ -233,14 +233,14 @@ export default class extends Chart {
           .each((d, i, arr) => {
             d3.select(arr[i])
               .transition()
-              .duration(1000)
+              .duration(500)
               .style('opacity', selectedGroups.length === 0 || selectedGroups.includes(d.group) ? 1 : 0.2);
           });
         this.svg.selectAll('.ac-bar-legend-element')
           .each((d, i, arr) => {
             d3.select(arr[i])
               .transition()
-              .duration(1000)
+              .duration(500)
               .style('opacity', selectedGroups.length === 0 || selectedGroups.includes(d) ? 1 : 0.2);
           });
       });
