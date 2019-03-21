@@ -79,7 +79,7 @@ export default class extends Chart {
     const x = d3.scaleBand()
       .domain(categories)
       .range([0, width])
-      .paddingInner(0.15)
+      .paddingInner(0.2)
       .paddingOuter(0.05);
 
     const xSub = d3.scaleBand()
@@ -87,7 +87,7 @@ export default class extends Chart {
       .range([0, x.bandwidth()]);
 
     const y = d3.scaleLinear()
-      .domain(d3.extent(data.map(d => d.y)))
+      .domain([0, d3.max(data.map(d => d.y))])
       .range([height, 0]);
 
     this.axisBottom
@@ -115,11 +115,32 @@ export default class extends Chart {
       .remove();
 
     const barGroup = this.svg.selectAll('.ac-bar-collection').selectAll('.ac-bar-group')
-      .data(category => data.filter(d => d.category === category));
+      .data(category => data.filter(d => d.category === category), d => `${d.group}:${d.category}`);
 
-    const barGroupEnter = barGroup.enter()
+    barGroup.enter()
       .append('g')
       .attr('class', 'ac-bar-group')
+      .call((parent) => {
+        parent.append('rect')
+          .attr('x', d => xSub(d.group))
+          .attr('y', height)
+          .transition()
+          .duration(500)
+          .attr('x', d => xSub(d.group))
+          .attr('y', d => y(d.y) - 2)
+          .attr('width', xSub.bandwidth())
+          .attr('height', d => height - y(d.y) + 2)
+          .attr('fill', d => color(d.group));
+
+        // parent.append('text')
+        //   .attr('text-anchor', 'middle')
+        //   .attr('x', d => xSub(d.group) + xSub.bandwidth() / 2)
+        //   .attr('y', height)
+        //   .text(d => d.y)
+        //   .transition(d3.easePoly)
+        //   .duration(500)
+        //   .attr('y', d => y(d.y) - 4);
+      })
       .merge(barGroup)
       .on('click', d => barClickCallback(d))
       .on('mouseenter', (d) => {
@@ -132,20 +153,39 @@ export default class extends Chart {
           .style('opacity', 1);
       });
 
+    barGroup
+      .call((parent) => {
+        parent.select('rect')
+          .transition()
+          .duration(500)
+          .attr('x', d => xSub(d.group))
+          .attr('y', d => y(d.y) - 2)
+          .attr('width', xSub.bandwidth())
+          .attr('height', d => height - y(d.y) + 2)
+          .attr('fill', d => color(d.group));
+
+        // parent.select('text')
+        //   .text(d => d.y)
+        //   .transition(d3.easePoly)
+        //   .duration(500)
+        //   .attr('x', d => xSub(d.group) + xSub.bandwidth() / 2)
+        //   .attr('y', d => y(d.y) - 4);
+      });
+
     barGroup.exit()
+      .call((parent) => {
+        parent.select('rect')
+          .transition()
+          .duration(500)
+          .attr('width', 0)
+          .remove();
+
+        // parent.select('text')
+        //   .remove();
+      })
+      .transition()
+      .delay(500)
       .remove();
-
-    barGroupEnter.append('rect')
-      .attr('x', d => xSub(d.group))
-      .attr('y', d => y(d.y) - 2)
-      .attr('width', xSub.bandwidth())
-      .attr('height', d => height - y(d.y) + 2)
-      .attr('fill', d => color(d.group));
-
-    barGroupEnter.append('text')
-      .attr('text-anchor', 'middle')
-      .attr('transform', d => `translate(${xSub(d.group) + xSub.bandwidth() / 2}, ${y(d.y) - 4})`)
-      .text(d => d.y);
 
     const legendElementSize = height / 30;
 
