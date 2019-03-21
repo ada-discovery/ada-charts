@@ -1,10 +1,11 @@
 import * as d3 from 'd3';
 import Chart from '../Chart';
 import '../../assets/css/scatterplot.css';
+import textUtils from '../../utils/textwrappers';
 
 const ANIMATION_DURATION = 500;
 const MAX_FONT_SIZE = 20;
-const D3_AXIS_TEXT_OFFSET = 9;
+
 
 export default class extends Chart {
   constructor({ container }) {
@@ -197,21 +198,11 @@ export default class extends Chart {
       .tickSizeInner(width)
       .tickFormat('');
 
-    function axisWrap(nodes, maxWidth) {
-      nodes.each(function () {
-        const text = d3.select(this);
-        while (text.node().getComputedTextLength() > maxWidth - D3_AXIS_TEXT_OFFSET) {
-          const fontSize = parseInt(text.style('font-size').split('px')[0], 10);
-          text.style('font-size', `${(fontSize) - 1}px`);
-        }
-      });
-    }
-
     this.axisBottom
       .attr('transform', `translate(0, ${height})`)
       .call(xAxisBottom)
       .selectAll('text')
-      .call(axisWrap, width / (x.ticks().length));
+      .call(textUtils.axisShrinkFitText, width / (x.ticks().length));
 
     this.axisTop
       .call(xAxisTop);
@@ -219,7 +210,7 @@ export default class extends Chart {
     this.axisLeft
       .call(yAxisLeft)
       .selectAll('text')
-      .call(axisWrap, margin.left - yLabelSize);
+      .call(textUtils.axisShrinkFitText, margin.left - yLabelSize);
 
     this.axisRight
       .attr('transform', `translate(${width}, 0)`)
@@ -307,39 +298,6 @@ ${!categoryKeys ? d[2] : this.categories[d[2]]}</br>
       .attr('r', 0)
       .remove();
 
-    function legendWrap(nodes, maxWidth) {
-      nodes.each(function () {
-        const text = d3.select(this);
-        const words = text.text().split(/\s+/);
-        let line = [];
-        let lineNumber = 0;
-        const lineHeight = 1.1; // ems
-        let tspan = text.text(null)
-          .append('tspan')
-          .attr('x', text.attr('x'))
-          .attr('y', text.attr('y'));
-        words.forEach((word, i) => {
-          line.push(word);
-          tspan.text(line.join(' '));
-          if (tspan.node().getComputedTextLength() > maxWidth) {
-            if (i > 0) {
-              line.pop();
-              tspan.text(lineNumber === 1 ? `${line.join(' ')}...` : line.join(' '));
-              if (lineNumber < 1) {
-                lineNumber += 1;
-                line = [word];
-                tspan = text.append('tspan')
-                  .attr('x', text.attr('x'))
-                  .attr('y', text.attr('y'))
-                  .attr('dy', `${lineNumber * lineHeight}em`)
-                  .text(word);
-              }
-            }
-          }
-        });
-      });
-    }
-
     const legendRectHeight = height / 30;
     const legendRectWidth = width / 30;
     const legendPadding = legendRectHeight / 2;
@@ -382,7 +340,7 @@ ${!categoryKeys ? d[2] : this.categories[d[2]]}</br>
       .attr('y', (_, i) => ((legendRectHeight + legendPadding) * i + legendRectHeight / 2))
       .style('dominant-baseline', 'central')
       .text(d => this.categories[d])
-      .call(legendWrap, legendTextMaxWidth);
+      .call(textUtils.wrapFitText, legendTextMaxWidth);
 
     legendElement.exit()
       .remove();

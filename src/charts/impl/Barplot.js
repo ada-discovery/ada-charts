@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import Chart from '../Chart';
 import '../../assets/css/barplot.css';
+import textUtils from '../../utils/textwrappers';
 
 export default class extends Chart {
   constructor({ container }) {
@@ -96,7 +97,9 @@ export default class extends Chart {
 
     this.axisLeft
       .attr('transform', `translate(${0}, ${0})`)
-      .call(d3.axisLeft(y));
+      .call(d3.axisLeft(y))
+      .selectAll('text')
+      .call(textUtils.axisShrinkFitText, margin.left);
 
     this.axisRight
       .attr('transform', `translate(${width}, ${0})`)
@@ -125,7 +128,7 @@ export default class extends Chart {
           .attr('x', d => xSub(d.group))
           .attr('y', height)
           .transition()
-          .duration(500)
+          .duration(1000)
           .attr('x', d => xSub(d.group))
           .attr('y', d => y(d.y) - 2)
           .attr('width', xSub.bandwidth())
@@ -133,20 +136,19 @@ export default class extends Chart {
           .attr('fill', d => color(d.group));
 
         parent.append('text')
-          .attr('text-anchor', 'middle')
-          .attr('x', d => xSub(d.group) + xSub.bandwidth() / 2)
-          .attr('y', height)
+          .attr('text-anchor', 'end')
+          .style('dominant-baseline', 'central')
+          .attr('transform', d => `translate(${xSub(d.group) + xSub.bandwidth() / 2}, ${y(d.y) - 4})rotate(90)`)
           .style('visibility', 'hidden')
-          .text(d => d.y)
-          .transition(d3.easePoly)
-          .duration(500)
-          .attr('y', d => y(d.y) - 4);
+          .text(d => d.y);
       })
       .merge(barGroup)
       .on('click', d => barClickCallback(d))
       .on('mouseenter', (d) => {
         this.svg.selectAll('.ac-bar-group')
           .filter(e => d.group !== e.group)
+          .transition()
+          .duration(1000)
           .style('opacity', 0.2);
         this.svg.selectAll('.ac-bar-group')
           .filter(e => d.group === e.group)
@@ -157,6 +159,8 @@ export default class extends Chart {
       })
       .on('mouseleave', () => {
         this.svg.selectAll('.ac-bar-group')
+          .transition()
+          .duration(1000)
           .style('opacity', 1)
           .call((parent) => {
             parent.select('text')
@@ -168,7 +172,7 @@ export default class extends Chart {
       .call((parent) => {
         parent.select('rect')
           .transition()
-          .duration(500)
+          .duration(1000)
           .attr('x', d => xSub(d.group))
           .attr('y', d => y(d.y) - 2)
           .attr('width', xSub.bandwidth())
@@ -176,27 +180,21 @@ export default class extends Chart {
           .attr('fill', d => color(d.group));
 
         parent.select('text')
+          .attr('transform', d => `translate(${xSub(d.group) + xSub.bandwidth() / 2}, ${y(d.y) - 4})rotate(90)`)
           .style('visibility', 'hidden')
-          .text(d => d.y)
-          .transition(d3.easePoly)
-          .duration(500)
-          .attr('x', d => xSub(d.group) + xSub.bandwidth() / 2)
-          .attr('y', d => y(d.y) - 4);
+          .text(d => d.y);
       });
 
     barGroup.exit()
       .call((parent) => {
         parent.select('rect')
-          .transition()
-          .duration(500)
-          .attr('width', 0)
           .remove();
 
         parent.select('text')
           .remove();
       })
       .transition()
-      .delay(500)
+      .delay(1000)
       .remove();
 
     const legendElementSize = height / 30;
@@ -235,14 +233,14 @@ export default class extends Chart {
           .each((d, i, arr) => {
             d3.select(arr[i])
               .transition()
-              .duration(500)
+              .duration(1000)
               .style('opacity', selectedGroups.length === 0 || selectedGroups.includes(d.group) ? 1 : 0.2);
           });
         this.svg.selectAll('.ac-bar-legend-element')
           .each((d, i, arr) => {
             d3.select(arr[i])
               .transition()
-              .duration(500)
+              .duration(1000)
               .style('opacity', selectedGroups.length === 0 || selectedGroups.includes(d) ? 1 : 0.2);
           });
       });

@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import Chart from '../Chart';
 import '../../assets/css/heatmap.css';
+import textUtils from '../../utils/textwrappers';
 
 const ANIMATION_DURATION = 1000;
 const MAX_FONT_SIZE = 20;
@@ -209,17 +210,6 @@ export default class extends Chart {
     rect.exit()
       .remove();
 
-    function wrap(selection, maxWidth) {
-      const node = d3.select(selection);
-      let textLength = node.node().getComputedTextLength();
-      let text = node.text();
-      while (textLength > maxWidth && text.length > 0) {
-        text = text.slice(0, -1);
-        node.text(`${text}..`);
-        textLength = node.node().getComputedTextLength();
-      }
-    }
-
     const rowLabels = this.svg.selectAll('text.ac-heatmap-row-label')
       .data(this.rows, d => d);
 
@@ -246,7 +236,7 @@ export default class extends Chart {
       })
       .merge(rowLabels)
       .style('font-size', `${this.yScale.bandwidth() > MAX_FONT_SIZE ? MAX_FONT_SIZE : this.yScale.bandwidth()}px`)
-      .each((_, i, arr) => wrap(arr[i], (this.rowLabelPos === 'left' ? this.margin.left : this.margin.right) - AXIS_LABEL_FONT_SIZE - ROW_COL_LABELS_OFFSET));
+      .each((_, i, arr) => textUtils.sliceFitText(arr[i], (this.rowLabelPos === 'left' ? this.margin.left : this.margin.right) - AXIS_LABEL_FONT_SIZE - ROW_COL_LABELS_OFFSET));
 
     rowLabels
       .transition()
@@ -285,7 +275,7 @@ export default class extends Chart {
       })
       .merge(colLabels)
       .style('font-size', `${(this.xScale.bandwidth() > MAX_FONT_SIZE ? MAX_FONT_SIZE : this.xScale.bandwidth()) - 1}px`)
-      .each((_, i, arr) => wrap(arr[i], (this.colLabelPos === 'top' ? this.margin.top : this.margin.bottom) - AXIS_LABEL_FONT_SIZE - ROW_COL_LABELS_OFFSET));
+      .each((_, i, arr) => textUtils.sliceFitText(arr[i], (this.colLabelPos === 'top' ? this.margin.top : this.margin.bottom) - AXIS_LABEL_FONT_SIZE - ROW_COL_LABELS_OFFSET));
 
     colLabels
       .transition()
