@@ -36,11 +36,11 @@ export default class extends Chart {
   }
 
   render({
-           title,
-           categories,
-           series,
-           barClickCallback,
-         }) {
+    title,
+    categories,
+    series,
+    barClickCallback,
+  }) {
     const groups = series.map(d => d.name);
     const data = [];
     series.forEach((d) => {
@@ -48,7 +48,6 @@ export default class extends Chart {
         e.category = e.name;
         e.group = d.name;
         delete e.name;
-        delete e.key;
         data.push(e);
       });
     });
@@ -187,15 +186,6 @@ export default class extends Chart {
       });
 
     barGroup.exit()
-      .call((parent) => {
-        parent.select('rect')
-          .remove();
-
-        parent.select('text')
-          .remove();
-      })
-      .transition()
-      .delay(500)
       .remove();
 
     const legendElementSize = height / 30;
