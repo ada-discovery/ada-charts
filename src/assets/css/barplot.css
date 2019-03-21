@@ -1,12 +1,12 @@
 .ac-bar-group rect {
-    stroke-width: 1;
-    stroke: #d6d6d6;
+    /*stroke-width: 1;*/
+    /*stroke: #d6d6d6;*/
     shape-rendering: crispEdges;
     cursor: pointer;
 }
 
 .ac-bar-group rect:hover {
-    stroke: #f00;
+
 }
 
 .ac-bar-legend-element {

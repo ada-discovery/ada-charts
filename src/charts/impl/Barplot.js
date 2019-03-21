@@ -132,14 +132,15 @@ export default class extends Chart {
           .attr('height', d => height - y(d.y) + 2)
           .attr('fill', d => color(d.group));
 
-        // parent.append('text')
-        //   .attr('text-anchor', 'middle')
-        //   .attr('x', d => xSub(d.group) + xSub.bandwidth() / 2)
-        //   .attr('y', height)
-        //   .text(d => d.y)
-        //   .transition(d3.easePoly)
-        //   .duration(500)
-        //   .attr('y', d => y(d.y) - 4);
+        parent.append('text')
+          .attr('text-anchor', 'middle')
+          .attr('x', d => xSub(d.group) + xSub.bandwidth() / 2)
+          .attr('y', height)
+          .style('visibility', 'hidden')
+          .text(d => d.y)
+          .transition(d3.easePoly)
+          .duration(500)
+          .attr('y', d => y(d.y) - 4);
       })
       .merge(barGroup)
       .on('click', d => barClickCallback(d))
@@ -147,10 +148,20 @@ export default class extends Chart {
         this.svg.selectAll('.ac-bar-group')
           .filter(e => d.group !== e.group)
           .style('opacity', 0.2);
+        this.svg.selectAll('.ac-bar-group')
+          .filter(e => d.group === e.group)
+          .call((parent) => {
+            parent.select('text')
+              .style('visibility', 'visible');
+          });
       })
       .on('mouseleave', () => {
         this.svg.selectAll('.ac-bar-group')
-          .style('opacity', 1);
+          .style('opacity', 1)
+          .call((parent) => {
+            parent.select('text')
+              .style('visibility', 'hidden');
+          });
       });
 
     barGroup
@@ -164,12 +175,13 @@ export default class extends Chart {
           .attr('height', d => height - y(d.y) + 2)
           .attr('fill', d => color(d.group));
 
-        // parent.select('text')
-        //   .text(d => d.y)
-        //   .transition(d3.easePoly)
-        //   .duration(500)
-        //   .attr('x', d => xSub(d.group) + xSub.bandwidth() / 2)
-        //   .attr('y', d => y(d.y) - 4);
+        parent.select('text')
+          .style('visibility', 'hidden')
+          .text(d => d.y)
+          .transition(d3.easePoly)
+          .duration(500)
+          .attr('x', d => xSub(d.group) + xSub.bandwidth() / 2)
+          .attr('y', d => y(d.y) - 4);
       });
 
     barGroup.exit()
@@ -180,8 +192,8 @@ export default class extends Chart {
           .attr('width', 0)
           .remove();
 
-        // parent.select('text')
-        //   .remove();
+        parent.select('text')
+          .remove();
       })
       .transition()
       .delay(500)
