@@ -117,6 +117,8 @@ export default class extends Chart {
     barCollection.exit()
       .remove();
 
+    const selectedGroups = [];
+
     const barGroup = this.svg.selectAll('.ac-bar-collection').selectAll('.ac-bar-group')
       .data(category => data.filter(d => d.category === category), d => `${d.group}:${d.category}`);
 
@@ -146,10 +148,9 @@ export default class extends Chart {
       .on('click', d => barClickCallback(d))
       .on('mouseenter', (d) => {
         this.svg.selectAll('.ac-bar-group')
-          .filter(e => d.group !== e.group)
           .transition()
           .duration(500)
-          .style('opacity', 0.2);
+          .style('opacity', e => (d.group !== e.group ? 0.2 : 1));
         this.svg.selectAll('.ac-bar-group')
           .filter(e => d.group === e.group)
           .call((parent) => {
@@ -165,7 +166,7 @@ export default class extends Chart {
           })
           .transition()
           .duration(500)
-          .style('opacity', 1);
+          .style('opacity', d => (selectedGroups.length === 0 || selectedGroups.includes(d.group) ? 1 : 0.2));
       });
 
     barGroup
@@ -202,7 +203,6 @@ export default class extends Chart {
     const legend = this.svg.selectAll('.ac-bar-legend-element')
       .data(groups);
 
-    const selectedGroups = [];
     legend.enter()
       .append('g')
       .attr('class', 'ac-bar-legend-element')
