@@ -193,9 +193,23 @@ export default class extends Chart {
       .data(groups);
 
     const selectedGroups = [];
-    const legendEnter = legend.enter()
+    legend.enter()
       .append('g')
       .attr('class', 'ac-bar-legend-element')
+      .call((parent) => {
+        parent
+          .append('rect')
+          .attr('width', legendElementSize)
+          .attr('height', legendElementSize)
+          .attr('fill', color);
+
+        parent
+          .append('text')
+          .attr('text-anchor', 'start')
+          .style('dominant-baseline', 'central')
+          .attr('transform', `translate(${legendElementSize + 2}, ${legendElementSize / 2})`)
+          .text(d => d);
+      })
       .merge(legend)
       .attr('transform', (d, i) => `translate(${width + legendElementSize}, ${(legendElementSize + legendElementSize / 2) * i})`)
       .on('click', (group) => {
@@ -223,18 +237,5 @@ export default class extends Chart {
 
     legend.exit()
       .remove();
-
-    legendEnter
-      .append('rect')
-      .attr('width', legendElementSize)
-      .attr('height', legendElementSize)
-      .attr('fill', color);
-
-    legendEnter
-      .append('text')
-      .attr('text-anchor', 'start')
-      .style('dominant-baseline', 'central')
-      .attr('transform', `translate(${legendElementSize + 2}, ${legendElementSize / 2})`)
-      .text(d => d);
   }
 }
