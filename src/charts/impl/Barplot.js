@@ -36,11 +36,11 @@ export default class extends Chart {
   }
 
   render({
-    title,
-    categories,
-    series,
-    barClickCallback,
-  }) {
+           title,
+           categories,
+           series,
+           barClickCallback,
+         }) {
     const groups = series.map(d => d.name);
     const data = [];
     series.forEach((d) => {
@@ -221,6 +221,9 @@ export default class extends Chart {
           .text(d => d);
       })
       .merge(legend)
+      .each((_, i, arr) => {
+        textUtils.sliceFitText(d3.select(arr[i]).select('text').node(), margin.right - 2 * legendElementSize - 4);
+      })
       .attr('transform', (d, i) => `translate(${width + legendElementSize}, ${(legendElementSize + legendElementSize / 2) * i})`)
       .on('click', (group) => {
         const idx = selectedGroups.indexOf(group);

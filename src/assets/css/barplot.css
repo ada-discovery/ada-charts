@@ -13,6 +13,10 @@
     cursor: pointer;
 }
 
+.ac-bar-legend-element text {
+    font-size: 0.8em;
+}
+
 .ac-bar-axis path {
     stroke: #d6d6d6;
     stroke-width: 1px;
