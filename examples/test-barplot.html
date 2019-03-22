@@ -38,24 +38,45 @@
     }
 
     const series = [];
-    groups.forEach(group => {
-      series.push({
-        name: group,
-        data: categories.map(category => {
-          return {
-            name: category,
-            y: Math.floor(Math.random() * 10000)
-          }
-        })
+
+    if (rng < 0.33) { // contains only negative
+      groups.forEach(group => {
+        series.push({
+          name: group,
+          data: categories.map(category => {
+            return {
+              name: category,
+              y: -Math.floor(Math.random() * 10000)
+            }
+          })
+        });
       });
-    });
-    // if (rng < 0.33) { // contains only negative
-    //
-    // } else if (rng >= 0.33 && rng < 0.66) { // contains only positive
-    //
-    // } else { // contains negative and positive
-    //
-    // }
+    } else if (rng >= 0.33 && rng < 0.66) { // contains only positive
+      groups.forEach(group => {
+        series.push({
+          name: group,
+          data: categories.map(category => {
+            return {
+              name: category,
+              y: Math.floor(Math.random() * 10000)
+            }
+          })
+        });
+      });
+    } else { // contains negative and positive
+      groups.forEach(group => {
+        series.push({
+          name: group,
+          data: categories.map(category => {
+            return {
+              name: category,
+              y: (Math.random() < 0.5 ? 1 : -1) * Math.floor(Math.random() * 10000)
+            }
+          })
+        });
+      });
+    }
+
     return {
       groups,
       categories,

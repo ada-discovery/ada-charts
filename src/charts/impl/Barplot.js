@@ -43,11 +43,18 @@ export default class extends Chart {
   }) {
     const groups = series.map(d => d.name);
     const data = [];
+    let seriesContainsPositive = false;
+    let seriesContainsNegative = false;
     series.forEach((d) => {
       d.data.forEach((e) => {
         e.category = e.name;
         e.group = d.name;
         delete e.name;
+        if (e.y > 0) {
+          seriesContainsPositive = true;
+        } else {
+          seriesContainsNegative = true;
+        }
         data.push(e);
       });
     });
@@ -86,8 +93,10 @@ export default class extends Chart {
       .domain(groups)
       .range([0, x.bandwidth()]);
 
+    const maxValue = d3.max(data.map(d => Math.abs(d.y)));
+
     const y = d3.scaleLinear()
-      .domain([0, d3.max(data.map(d => d.y))])
+      .domain([!seriesContainsNegative ? 0 : -maxValue, !seriesContainsPositive ? 0 : maxValue])
       .range([height, 0]);
 
     this.axisBottom
@@ -127,21 +136,29 @@ export default class extends Chart {
       .call((parent) => {
         parent.append('rect')
           .attr('x', d => xSub(d.group))
-          .attr('y', height)
+          .attr('y', y(0))
           .transition()
           .duration(500)
           .attr('x', d => xSub(d.group))
-          .attr('y', d => y(d.y) - 2)
+          .attr('y', d => (d.y < 0 ? y(0) : y(d.y)))
           .attr('width', xSub.bandwidth())
-          .attr('height', d => height - y(d.y) + 2)
+          .attr('height', (d) => {
+            if (seriesContainsNegative && seriesContainsPositive) {
+              return d.y < 0 ? y(d.y) - height / 2 : height / 2 - y(d.y);
+            }
+            if (seriesContainsNegative && !seriesContainsPositive) {
+              return y(d.y);
+            }
+            return height - y(d.y);
+          })
           .attr('fill', d => color(d.group));
 
         parent.append('text')
-          .attr('text-anchor', 'end')
+          .attr('text-anchor', d => (d.y < 0 ? 'start' : 'end'))
           .style('dominant-baseline', 'central')
-          .attr('transform', d => `translate(${xSub(d.group) + xSub.bandwidth() / 2}, ${y(d.y) - 4})rotate(90)`)
+          .attr('transform', d => `translate(${xSub(d.group) + xSub.bandwidth() / 2}, ${y(d.y)})rotate(90)`)
           .style('visibility', 'hidden')
-          .text(d => d.y);
+          .text(d => `\u00A0${d.y}\u00A0`);
       })
       .merge(barGroup)
       .on('click', d => barClickCallback(d))
@@ -174,15 +191,24 @@ export default class extends Chart {
           .transition()
           .duration(500)
           .attr('x', d => xSub(d.group))
-          .attr('y', d => y(d.y) - 2)
+          .attr('y', d => (d.y < 0 ? y(0) : y(d.y)))
           .attr('width', xSub.bandwidth())
-          .attr('height', d => height - y(d.y) + 2)
+          .attr('height', (d) => {
+            if (seriesContainsNegative && seriesContainsPositive) {
+              return d.y < 0 ? y(d.y) - height / 2 : height / 2 - y(d.y);
+            }
+            if (seriesContainsNegative && !seriesContainsPositive) {
+              return y(d.y);
+            }
+            return height - y(d.y);
+          })
           .attr('fill', d => color(d.group));
 
         parent.select('text')
-          .attr('transform', d => `translate(${xSub(d.group) + xSub.bandwidth() / 2}, ${y(d.y) - 4})rotate(90)`)
+          .attr('text-anchor', d => (d.y < 0 ? 'start' : 'end'))
+          .attr('transform', d => `translate(${xSub(d.group) + xSub.bandwidth() / 2}, ${y(d.y)})rotate(90)`)
           .style('visibility', 'hidden')
-          .text(d => d.y);
+          .text(d => `\u00A0${d.y}\u00A0`);
       });
 
     barGroup.exit()
