@@ -3,8 +3,8 @@
 }
 
 .ac-bar-group rect {
-    /*stroke-width: 1;*/
-    /*stroke: #d6d6d6;*/
+    stroke-width: 1;
+    stroke: #868686;
     shape-rendering: crispEdges;
     cursor: pointer;
 }
