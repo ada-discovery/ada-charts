@@ -17,6 +17,11 @@
 
 }
 
+.ac-bar-label {
+    font-size: 1em;
+    fill: #797979;
+}
+
 .ac-bar-legend-element {
     cursor: pointer;
 }

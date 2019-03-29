@@ -33,6 +33,18 @@ export default class extends Chart {
     this.axisRight = this.svg
       .append('g')
       .attr('class', 'ac-bar-right-axis ac-bar-axis');
+
+    this.labelLeft = this.svg
+      .attr('class', 'ac-bar-label')
+      .attr('text-anchor', 'middle')
+      .style('dominant-baseline', 'central')
+      .append('text');
+
+    this.labelBottom = this.svg
+      .attr('class', 'ac-bar-label')
+      .attr('text-anchor', 'middle')
+      .style('dominant-baseline', 'central')
+      .append('text');
   }
 
   static get name() {
@@ -71,7 +83,7 @@ export default class extends Chart {
       top: this.containerWidth / 12,
       right: this.containerWidth / 5,
       bottom: this.containerWidth / 15,
-      left: this.containerWidth / 15,
+      left: this.containerWidth / 12,
     };
 
     const width = this.containerWidth - margin.left - margin.right;
@@ -88,6 +100,14 @@ export default class extends Chart {
     this.title
       .attr('transform', `translate(${width / 2}, ${-margin.top / 2})`)
       .text(title);
+
+    this.labelLeft
+      .attr('transform', `translate(${-margin.left * 0.8}, ${height / 2})rotate(-90)`)
+      .text(yAxisLabel);
+
+    this.labelBottom
+      .attr('transform', `translate(${width / 2}, ${height + margin.bottom * 0.8})`)
+      .text(xAxisLabel);
 
     const xValues = data.reduce((prev, curr) => prev.concat(curr), []).map(d => d.x);
     const uniXValues = Array.from(new Set(xValues));
@@ -128,7 +148,7 @@ export default class extends Chart {
       const categoryWidth = width / uniXValues.length;
       const catIdx = uniXValues.indexOf(d.x);
       const groupIdx = groups.indexOf(d.group);
-      return catIdx * categoryWidth + groupIdx * barWidth + barWidth * 0.75;
+      return catIdx * categoryWidth + groupIdx * barWidth + barWidth / 2 + width / uniXValues.length * CATEGORY_PADDING_FACTOR / 2;
     }
 
     const y = d3.scaleLinear()
@@ -143,7 +163,7 @@ export default class extends Chart {
       .attr('transform', `translate(${0}, ${0})`)
       .call(d3.axisLeft(y))
       .selectAll('text')
-      .call(textUtils.axisShrinkFitText, margin.left);
+      .call(textUtils.axisShrinkFitText, margin.left * 0.7);
 
     this.axisRight
       .attr('transform', `translate(${width}, ${0})`)
