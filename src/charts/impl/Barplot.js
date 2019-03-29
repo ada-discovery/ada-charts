@@ -3,6 +3,9 @@ import Chart from '../Chart';
 import '../../assets/css/barplot.css';
 import textUtils from '../../utils/textwrappers';
 
+const BAR_PADDING_FACTOR = 0.2;
+const OUTER_PADDING_FACTOR = 0.1;
+
 export default class extends Chart {
   constructor({ container }) {
     super({ container });
@@ -37,24 +40,24 @@ export default class extends Chart {
 
   render({
     title,
-    categories,
-    series,
+    values,
+    dataType,
+    xAxisLabel,
+    yAxisLabel,
     barClickCallback,
   }) {
-    const groups = series.map(d => d.name);
+    const groups = values.map(d => d.group);
     const data = [];
-    let seriesContainsPositive = false;
-    let seriesContainsNegative = false;
-    series.forEach((d) => {
+    let valuesContainsPositive = false;
+    let valuesContainsNegative = false;
+    values.forEach((d) => {
       d.data.forEach((e) => {
-        e.category = e.name;
-        e.group = d.name;
-        delete e.name;
         if (e.y > 0) {
-          seriesContainsPositive = true;
+          valuesContainsPositive = true;
         } else {
-          seriesContainsNegative = true;
+          valuesContainsNegative = true;
         }
+        e.group = d.group;
         data.push(e);
       });
     });
@@ -73,6 +76,8 @@ export default class extends Chart {
     const width = this.containerWidth - margin.left - margin.right;
     const height = this.containerWidth - margin.top - margin.bottom;
 
+    const outerPadding = OUTER_PADDING_FACTOR * width;
+
     d3.select(this.container).select('svg')
       .attr('width', width + margin.left + margin.right)
       .attr('height', height + margin.top + margin.bottom);
@@ -83,20 +88,50 @@ export default class extends Chart {
       .attr('transform', `translate(${width / 2}, ${-margin.top / 2})`)
       .text(title);
 
-    const x = d3.scaleBand()
-      .domain(categories)
-      .range([0, width])
-      .paddingInner(0.2)
-      .paddingOuter(0.05);
+    const xValues = data.reduce((prev, curr) => prev.concat(curr), []).map(d => d.x);
+    const uniXValues = Array.from(new Set(xValues));
+    const maxYValue = d3.max(data.map(d => Math.abs(d.y)));
 
-    const xSub = d3.scaleBand()
-      .domain(groups)
-      .range([0, x.bandwidth()]);
+    const x = (() => {
+      if (dataType.startsWith('cat')) {
+        return d3.scaleBand()
+          .domain(uniXValues)
+          .range([outerPadding, width - outerPadding]);
+      }
+      return d3.scaleLinear()
+        .domain(d3.extent(data.map(d => d.x)))
+        .range([outerPadding, width - outerPadding]);
+    })();
 
-    const maxValue = d3.max(data.map(d => Math.abs(d.y)));
+    const barWidth = (() => {
+      if (dataType.startsWith('cat')) {
+        return (width / xValues.length) * (1 - BAR_PADDING_FACTOR);
+      }
+      let minDist = outerPadding * 2;
+      groups.forEach((group) => {
+        const groupData = data.filter(d => d.group === group);
+        for (let i = 0; i < groupData.length - 1; i += 1) {
+          const dist = Math.abs(x(groupData[i].x) - x(groupData[i + 1].x));
+          if (dist < minDist) {
+            minDist = dist;
+          }
+        }
+      });
+      return minDist * (1 - BAR_PADDING_FACTOR);
+    })();
+
+    function dToX(d) {
+      if (dataType.startsWith('num') || dataType.startsWith('time')) {
+        return x(d.x);
+      }
+      const categoryWidth = width / uniXValues.length;
+      const catIdx = uniXValues.indexOf(d.x);
+      const groupIdx = groups.indexOf(d.group);
+      return catIdx * categoryWidth + groupIdx * barWidth;
+    }
 
     const y = d3.scaleLinear()
-      .domain([!seriesContainsNegative ? 0 : -maxValue, !seriesContainsPositive ? 0 : maxValue])
+      .domain([!valuesContainsNegative ? 0 : -maxYValue, !valuesContainsPositive ? 0 : maxYValue])
       .range([height, 0]);
 
     this.axisBottom
@@ -113,40 +148,27 @@ export default class extends Chart {
       .attr('transform', `translate(${width}, ${0})`)
       .call(d3.axisLeft(y).tickSizeInner(width).tickFormat(''));
 
-    const barCollection = this.svg.selectAll('.ac-bar-collection')
-      .data(categories);
-
-    barCollection.enter()
-      .append('g')
-      .attr('class', 'ac-bar-collection')
-      .merge(barCollection)
-      .attr('transform', d => `translate(${x(d)}, 0)`);
-
-    barCollection.exit()
-      .remove();
-
     const selectedGroups = [];
 
-    const barGroup = this.svg.selectAll('.ac-bar-collection').selectAll('.ac-bar-group')
-      .data(category => data.filter(d => d.category === category), d => `${d.group}:${d.category}`);
+    const bar = this.svg.selectAll('.ac-bar-bar')
+      .data(data);
 
-    barGroup.enter()
+    bar.enter()
       .append('g')
-      .attr('class', 'ac-bar-group')
+      .attr('class', 'ac-bar-bar')
       .call((parent) => {
         parent.append('rect')
-          .attr('x', d => xSub(d.group))
+          .attr('x', d => dToX(d) - barWidth / 2)
+          .attr('width', barWidth)
           .attr('y', y(0))
           .transition()
           .duration(500)
-          .attr('x', d => xSub(d.group))
           .attr('y', d => (d.y < 0 ? y(0) : y(d.y)))
-          .attr('width', xSub.bandwidth())
           .attr('height', (d) => {
-            if (seriesContainsNegative && seriesContainsPositive) {
+            if (valuesContainsNegative && valuesContainsPositive) {
               return d.y < 0 ? y(d.y) - height / 2 : height / 2 - y(d.y);
             }
-            if (seriesContainsNegative && !seriesContainsPositive) {
+            if (valuesContainsNegative && !valuesContainsPositive) {
               return y(d.y);
             }
             return height - y(d.y);
@@ -156,18 +178,18 @@ export default class extends Chart {
         parent.append('text')
           .attr('text-anchor', d => (d.y < 0 ? 'start' : 'end'))
           .style('dominant-baseline', 'central')
-          .attr('transform', d => `translate(${xSub(d.group) + xSub.bandwidth() / 2}, ${y(d.y)})rotate(90)`)
+          .attr('transform', d => `translate(${dToX(d)}, ${y(d.y)})rotate(90)`)
           .style('visibility', 'hidden')
           .text(d => `\u00A0${d.y}\u00A0`);
       })
-      .merge(barGroup)
+      .merge(bar)
       .on('click', d => barClickCallback(d))
       .on('mouseenter', (d) => {
-        this.svg.selectAll('.ac-bar-group')
+        this.svg.selectAll('.ac-bar-bar')
           .transition()
           .duration(500)
           .style('opacity', e => (d.group !== e.group ? 0.2 : 1));
-        this.svg.selectAll('.ac-bar-group')
+        this.svg.selectAll('.ac-bar-bar')
           .filter(e => d.group === e.group)
           .call((parent) => {
             parent.select('text')
@@ -175,7 +197,7 @@ export default class extends Chart {
           });
       })
       .on('mouseleave', () => {
-        this.svg.selectAll('.ac-bar-group')
+        this.svg.selectAll('.ac-bar-bar')
           .call((parent) => {
             parent.select('text')
               .style('visibility', 'hidden');
@@ -185,19 +207,19 @@ export default class extends Chart {
           .style('opacity', d => (selectedGroups.length === 0 || selectedGroups.includes(d.group) ? 1 : 0.2));
       });
 
-    barGroup
+    bar
       .call((parent) => {
         parent.select('rect')
           .transition()
           .duration(500)
-          .attr('x', d => xSub(d.group))
+          .attr('x', d => dToX(d) - barWidth / 2)
           .attr('y', d => (d.y < 0 ? y(0) : y(d.y)))
-          .attr('width', xSub.bandwidth())
+          .attr('width', barWidth)
           .attr('height', (d) => {
-            if (seriesContainsNegative && seriesContainsPositive) {
+            if (valuesContainsNegative && valuesContainsPositive) {
               return d.y < 0 ? y(d.y) - height / 2 : height / 2 - y(d.y);
             }
-            if (seriesContainsNegative && !seriesContainsPositive) {
+            if (valuesContainsNegative && !valuesContainsPositive) {
               return y(d.y);
             }
             return height - y(d.y);
@@ -206,12 +228,12 @@ export default class extends Chart {
 
         parent.select('text')
           .attr('text-anchor', d => (d.y < 0 ? 'start' : 'end'))
-          .attr('transform', d => `translate(${xSub(d.group) + xSub.bandwidth() / 2}, ${y(d.y)})rotate(90)`)
+          .attr('transform', d => `translate(${dToX(d)}, ${y(d.y)})rotate(90)`)
           .style('visibility', 'hidden')
           .text(d => `\u00A0${d.y}\u00A0`);
       });
 
-    barGroup.exit()
+    bar.exit()
       .remove();
 
     const legendElementSize = height / 30;
@@ -248,7 +270,7 @@ export default class extends Chart {
         } else {
           selectedGroups.push(group);
         }
-        this.svg.selectAll('.ac-bar-group')
+        this.svg.selectAll('.ac-bar-bar')
           .each((d, i, arr) => {
             d3.select(arr[i])
               .transition()

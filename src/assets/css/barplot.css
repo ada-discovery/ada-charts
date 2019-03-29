@@ -2,18 +2,18 @@
     fill: #797979;
 }
 
-.ac-bar-group rect {
+.ac-bar-bar rect {
     stroke-width: 1;
     stroke: #868686;
     shape-rendering: crispEdges;
     cursor: pointer;
 }
 
-.ac-bar-group text {
+.ac-bar-bar text {
     color: #797979;
 }
 
-.ac-bar-group rect:hover {
+.ac-bar-bar rect:hover {
 
 }
 
