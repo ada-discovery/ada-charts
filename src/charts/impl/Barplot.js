@@ -45,6 +45,10 @@ export default class extends Chart {
       .attr('text-anchor', 'middle')
       .style('dominant-baseline', 'central')
       .append('text');
+
+    this.brush = this.svg
+      .append('g')
+      .attr('class', 'ac-bar-brush');
   }
 
   static get name() {
@@ -57,6 +61,7 @@ export default class extends Chart {
     dataType,
     xAxisLabel,
     yAxisLabel,
+    brushCallback,
     barClickCallback,
   }) {
     const groups = values.map(d => d.group);
@@ -148,7 +153,10 @@ export default class extends Chart {
       const categoryWidth = width / uniXValues.length;
       const catIdx = uniXValues.indexOf(d.x);
       const groupIdx = groups.indexOf(d.group);
-      return catIdx * categoryWidth + groupIdx * barWidth + barWidth / 2 + width / uniXValues.length * CATEGORY_PADDING_FACTOR / 2;
+      return catIdx * categoryWidth
+        + groupIdx * barWidth
+        + barWidth / 2
+        + width / uniXValues.length * CATEGORY_PADDING_FACTOR / 2;
     }
 
     const y = d3.scaleLinear()
@@ -168,6 +176,21 @@ export default class extends Chart {
     this.axisRight
       .attr('transform', `translate(${width}, ${0})`)
       .call(d3.axisLeft(y).tickSizeInner(width).tickFormat(''));
+
+    d3.select('.ac-bar-brush').selectAll('*').remove();
+    if (dataType.startsWith('num') || dataType.startsWith('time')) {
+      const brush = d3.brushX()
+        .extent([[0, 0], [width, height]])
+        .on('end', () => {
+          if (!d3.event.sourceEvent || !d3.event.selection) return;
+          const [x0, x1] = d3.event.selection;
+          brushCallback([x.invert(x0), x.invert(x1)]);
+        });
+
+      this.brush
+        .call(brush);
+    }
+
 
     const selectedGroups = [];
 
