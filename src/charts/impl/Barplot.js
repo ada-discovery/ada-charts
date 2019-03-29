@@ -3,7 +3,8 @@ import Chart from '../Chart';
 import '../../assets/css/barplot.css';
 import textUtils from '../../utils/textwrappers';
 
-const BAR_PADDING_FACTOR = 0.2;
+const BAR_PADDING_FACTOR = 0.1;
+const CATEGORY_PADDING_FACTOR = 0.2;
 const OUTER_PADDING_FACTOR = 0.1;
 
 export default class extends Chart {
@@ -96,7 +97,7 @@ export default class extends Chart {
       if (dataType.startsWith('cat')) {
         return d3.scaleBand()
           .domain(uniXValues)
-          .range([outerPadding, width - outerPadding]);
+          .range([0, width]);
       }
       return d3.scaleLinear()
         .domain(d3.extent(data.map(d => d.x)))
@@ -105,7 +106,7 @@ export default class extends Chart {
 
     const barWidth = (() => {
       if (dataType.startsWith('cat')) {
-        return (width / xValues.length) * (1 - BAR_PADDING_FACTOR);
+        return width / uniXValues.length * (1 - CATEGORY_PADDING_FACTOR) / groups.length;
       }
       let minDist = outerPadding * 2;
       groups.forEach((group) => {
@@ -127,7 +128,7 @@ export default class extends Chart {
       const categoryWidth = width / uniXValues.length;
       const catIdx = uniXValues.indexOf(d.x);
       const groupIdx = groups.indexOf(d.group);
-      return catIdx * categoryWidth + groupIdx * barWidth;
+      return catIdx * categoryWidth + groupIdx * barWidth + barWidth * 0.75;
     }
 
     const y = d3.scaleLinear()
