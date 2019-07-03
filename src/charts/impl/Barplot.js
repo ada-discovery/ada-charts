@@ -13,7 +13,7 @@ export default class extends Chart {
 
     this.svg = d3.select(container)
       .append('svg')
-      .attr('class', 'ac-box-svg ada-chart')
+      .attr('class', 'ac-bar-svg ada-chart')
       .append('g');
 
     this.title = this.svg
