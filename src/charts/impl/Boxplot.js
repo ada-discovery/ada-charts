@@ -29,10 +29,13 @@ export default class extends Chart {
     const width = this.containerWidth - margin.left - margin.right;
     const height = this.containerWidth - margin.top - margin.bottom;
 
-    const groups = data.map(d => d.label);
+    const groups = data.map(d => d.group);
+
     const x = d3.scaleBand()
       .domain(groups)
-      .range([0, width]);
+      .range([0, width])
+      .paddingInner(1)
+      .paddingOuter(0.5);
 
     const maxValue = (() => {
       const maxUpperWhisker = d3.max(data.map(d => d.upperWhisker));
@@ -64,9 +67,75 @@ export default class extends Chart {
       .data(data);
 
     box.enter()
-      .append('g')
+      .append('rect')
       .attr('class', 'ac-box-box')
-      .merge()
-      .attr('');
+      .merge(box)
+      .attr('x', d => x(d.group))
+      .attr('y', d => y(d.upperQuartile))
+      .attr('width', x.bandwidth())
+      .attr('height', d => y(d.upperQuartile) - y(d.lowerQuartile));
+
+    box.exit()
+      .remove();
+
+    const line = this.svg.selectAll('.ac-box-line')
+      .data(data);
+
+    line.enter()
+      .append('line')
+      .attr('class', 'ac-box-line')
+      .merge(line)
+      .attr('x1', d => x(d.label))
+      .attr('y1', d => y(d.upperWhisker))
+      .attr('x2', d => x(d.label))
+      .attr('y2', d => y(d.lowerWhisker));
+
+    line.exit()
+      .remove();
+
+    const upperWhisker = this.svg.selectAll('.ac-box-upper-whisker')
+      .data(data);
+
+    upperWhisker.enter()
+      .append('line')
+      .attr('class', '.ac-box-upper-whisker')
+      .merge(upperWhisker)
+      .attr('x1', d => x(d.label) - x.bandwidth() / 4)
+      .attr('y1', d => y(d.upperWhisker))
+      .attr('x2', d => x(d.label) + x.bandwidth() / 4)
+      .attr('y2', d => y(d.upperWhisker));
+
+    upperWhisker.exit()
+      .remove();
+
+    const lowerWhisker = this.svg.selectAll('.ac-box-lower-whisker')
+      .data(data);
+
+    lowerWhisker.enter()
+      .append('line')
+      .attr('class', '.ac-box-lower-whisker')
+      .merge(lowerWhisker)
+      .attr('x1', d => x(d.label) - x.bandwidth() / 4)
+      .attr('y1', d => y(d.lowerWhisker))
+      .attr('x2', d => x(d.label) + x.bandwidth() / 4)
+      .attr('y2', d => y(d.lowerWhisker));
+
+    lowerWhisker.exit()
+      .remove();
+
+    const median = this.svg.selectAll('.ac-box-median')
+      .data(data);
+
+    median.enter()
+      .append('line')
+      .attr('class', '.ac-box-median')
+      .merge(median)
+      .attr('x1', d => x(d.label) - x.bandwidth() / 2)
+      .attr('y1', d => y(d.median))
+      .attr('x2', d => x(d.label) + x.bandwidth() / 2)
+      .attr('y2', d => y(d.median));
+
+    median.exit()
+      .remove();
   }
 }
