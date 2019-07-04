@@ -43,6 +43,10 @@ export default class extends Chart {
 
     const groups = data.map(d => d.group);
 
+    const color = d3.scaleOrdinal()
+      .domain(groups)
+      .range(d3.schemePastel1);
+
     const x = d3.scaleBand()
       .domain(groups)
       .range([0, width])
@@ -65,9 +69,11 @@ export default class extends Chart {
       return d3.min(minLowerWhisker, min);
     })();
 
+    const UPPER_LOWER_PADDING = height / 20;
+
     const y = d3.scaleLinear()
       .domain([minValue, maxValue])
-      .range([height, 0]);
+      .range([height - UPPER_LOWER_PADDING, UPPER_LOWER_PADDING]);
 
     const axisBottom = d3.axisBottom(x);
     const axisRight = d3.axisLeft(y)
@@ -101,8 +107,12 @@ export default class extends Chart {
       .append('rect')
       .attr('class', 'ac-box-box')
       .attr('x', d => x(d.group))
-      .attr('y', d => y(d.upperQuartile))
+      .attr('y', d => y(d.median))
       .attr('width', x.bandwidth())
+      .style('fill', d => color(d.group))
+      .transition()
+      .duration(500)
+      .attr('y', d => y(d.upperQuartile))
       .attr('height', d => y(d.lowerQuartile) - y(d.upperQuartile));
 
     box
@@ -111,7 +121,8 @@ export default class extends Chart {
       .attr('x', d => x(d.group))
       .attr('y', d => y(d.upperQuartile))
       .attr('width', x.bandwidth())
-      .attr('height', d => y(d.lowerQuartile) - y(d.upperQuartile));
+      .attr('height', d => y(d.lowerQuartile) - y(d.upperQuartile))
+      .style('fill', d => color(d.group));
 
     box.exit()
       .remove();
@@ -123,8 +134,12 @@ export default class extends Chart {
       .append('line')
       .attr('class', 'ac-box-line')
       .attr('x1', d => x(d.group) + x.bandwidth() / 2)
-      .attr('y1', d => y(d.upperWhisker))
+      .attr('y1', d => y(d.median))
       .attr('x2', d => x(d.group) + x.bandwidth() / 2)
+      .attr('y2', d => y(d.median))
+      .transition()
+      .duration(500)
+      .attr('y1', d => y(d.upperWhisker))
       .attr('y2', d => y(d.lowerWhisker));
 
     line
@@ -145,8 +160,12 @@ export default class extends Chart {
       .append('line')
       .attr('class', 'ac-box-upper-whisker')
       .attr('x1', d => x(d.group) + x.bandwidth() / 3)
-      .attr('y1', d => y(d.upperWhisker))
+      .attr('y1', d => y(d.median))
       .attr('x2', d => x(d.group) + x.bandwidth() - x.bandwidth() / 3)
+      .attr('y2', d => y(d.median))
+      .transition()
+      .duration(500)
+      .attr('y1', d => y(d.upperWhisker))
       .attr('y2', d => y(d.upperWhisker));
 
     upperWhisker
@@ -167,8 +186,12 @@ export default class extends Chart {
       .append('line')
       .attr('class', 'ac-box-lower-whisker')
       .attr('x1', d => x(d.group) + x.bandwidth() / 3)
-      .attr('y1', d => y(d.lowerWhisker))
+      .attr('y1', d => y(d.median))
       .attr('x2', d => x(d.group) + x.bandwidth() - x.bandwidth() / 3)
+      .attr('y2', d => y(d.median))
+      .transition()
+      .duration(500)
+      .attr('y1', d => y(d.lowerWhisker))
       .attr('y2', d => y(d.lowerWhisker));
 
     lowerWhisker
