@@ -1,0 +1,29 @@
+.ac-box-line {
+    stroke: #000;
+    stroke-width: 2px;
+    shape-rendering: crispedges;
+}
+
+.ac-box-median {
+    stroke: #000;
+    stroke-width: 3px;
+    shape-rendering: crispedges;
+}
+
+.ac-box-upper-whisker {
+    stroke: #000;
+    stroke-width: 2px;
+    shape-rendering: crispedges;
+}
+
+.ac-box-lower-whisker {
+    stroke: #000;
+    stroke-width: 2px;
+    shape-rendering: crispedges;
+}
+
+.ac-box-box {
+    fill: rgb(30, 144, 255);
+    stroke: none;
+    shape-rendering: crispedges;
+}

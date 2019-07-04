@@ -34,7 +34,7 @@ export default class extends Chart {
     const x = d3.scaleBand()
       .domain(groups)
       .range([0, width])
-      .paddingInner(1)
+      .paddingInner(0.5)
       .paddingOuter(0.5);
 
     const maxValue = (() => {
@@ -70,10 +70,10 @@ export default class extends Chart {
       .append('rect')
       .attr('class', 'ac-box-box')
       .merge(box)
-      .attr('x', d => x(d.group))
+      .attr('x', d => x(d.group) - x.bandwidth() / 2)
       .attr('y', d => y(d.upperQuartile))
       .attr('width', x.bandwidth())
-      .attr('height', d => y(d.upperQuartile) - y(d.lowerQuartile));
+      .attr('height', d =>  y(d.lowerQuartile) - y(d.upperQuartile));
 
     box.exit()
       .remove();
@@ -85,9 +85,9 @@ export default class extends Chart {
       .append('line')
       .attr('class', 'ac-box-line')
       .merge(line)
-      .attr('x1', d => x(d.label))
+      .attr('x1', d => x(d.group))
       .attr('y1', d => y(d.upperWhisker))
-      .attr('x2', d => x(d.label))
+      .attr('x2', d => x(d.group))
       .attr('y2', d => y(d.lowerWhisker));
 
     line.exit()
@@ -98,11 +98,11 @@ export default class extends Chart {
 
     upperWhisker.enter()
       .append('line')
-      .attr('class', '.ac-box-upper-whisker')
+      .attr('class', 'ac-box-upper-whisker')
       .merge(upperWhisker)
-      .attr('x1', d => x(d.label) - x.bandwidth() / 4)
+      .attr('x1', d => x(d.group) - x.bandwidth() / 4)
       .attr('y1', d => y(d.upperWhisker))
-      .attr('x2', d => x(d.label) + x.bandwidth() / 4)
+      .attr('x2', d => x(d.group) + x.bandwidth() / 4)
       .attr('y2', d => y(d.upperWhisker));
 
     upperWhisker.exit()
@@ -113,11 +113,11 @@ export default class extends Chart {
 
     lowerWhisker.enter()
       .append('line')
-      .attr('class', '.ac-box-lower-whisker')
+      .attr('class', 'ac-box-lower-whisker')
       .merge(lowerWhisker)
-      .attr('x1', d => x(d.label) - x.bandwidth() / 4)
+      .attr('x1', d => x(d.group) - x.bandwidth() / 4)
       .attr('y1', d => y(d.lowerWhisker))
-      .attr('x2', d => x(d.label) + x.bandwidth() / 4)
+      .attr('x2', d => x(d.group) + x.bandwidth() / 4)
       .attr('y2', d => y(d.lowerWhisker));
 
     lowerWhisker.exit()
@@ -128,11 +128,11 @@ export default class extends Chart {
 
     median.enter()
       .append('line')
-      .attr('class', '.ac-box-median')
+      .attr('class', 'ac-box-median')
       .merge(median)
-      .attr('x1', d => x(d.label) - x.bandwidth() / 2)
+      .attr('x1', d => x(d.group) - x.bandwidth() / 2)
       .attr('y1', d => y(d.median))
-      .attr('x2', d => x(d.label) + x.bandwidth() / 2)
+      .attr('x2', d => x(d.group) + x.bandwidth() / 2)
       .attr('y2', d => y(d.median));
 
     median.exit()

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Boxplot</title>
+    <script src="http://localhost:8080/ada-charts.js"></script>
+</head>
+<body>
+<div id="boxplot-controls">
+    <span>API examples:</span>
+    <button onclick="update()">update()</button>
+    <button onclick="toPNG()">toPNG()</button>
+    <button onclick="toSVG()">toSVG()</button>
+</div>
+<div id="boxplot-container"></div>
+</body>
+</html>
+
+<script>
+  const container = document.querySelector('#boxplot-container');
+  const boxplot = AdaCharts.chart({ chartType: 'boxplot', container });
+
+  function toPNG() {
+    boxplot.toPNG();
+  }
+
+  function toSVG() {
+    boxplot.toSVG();
+  }
+
+  function randomBoxplots() {
+    const num = Math.floor(Math.random() * 15);
+    const boxplots = [];
+    for (let i = 0; i < num; i++) {
+      const upperWhisker = Math.random() * 10;
+      const lowerWhisker = upperWhisker - Math.random() * 10;
+      const upperQuartile = upperWhisker - Math.abs(upperWhisker - lowerWhisker) / 4;
+      const lowerQuartile = upperWhisker - Math.abs(upperWhisker - lowerWhisker) / 2;
+      const median = upperWhisker - Math.abs(upperWhisker - lowerWhisker) / 3;
+      boxplots.push({
+        group: 'Boxplot: ' + i,
+        upperWhisker,
+        upperQuartile,
+        median,
+        lowerQuartile,
+        lowerWhisker
+      });
+    }
+    return boxplots;
+  }
+
+  function update() {
+    boxplot.update({
+      caption: 'Random Boxplot',
+      xAxisLabel: 'X Axis Values',
+      yAxisLabel: 'Y Axis Values',
+      data: randomBoxplots(),
+    });
+  }
+</script>
+
+<style>
+    body {
+        display: flex;
+        flex-direction: row;
+    }
+
+    #boxplot-controls {
+        display: flex;
+        flex-direction: column;
+    }
+
+    #boxplot-container {
+        width: 50vw;
+    }
+</style>
