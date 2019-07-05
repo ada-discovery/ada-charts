@@ -40,3 +40,7 @@
 .ac-box-axis-left .tick line{
     stroke: none;
 }
+
+.ac-box-axis .tick text {
+    font-size: 1.5em;
+}

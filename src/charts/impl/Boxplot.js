@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import Chart from '../Chart';
 import '../../assets/css/boxplot.css';
+import textUtils from '../../utils/textwrappers';
 
 export default class extends Chart {
   constructor({ container }) {
@@ -87,12 +88,15 @@ export default class extends Chart {
       .selectAll('text')
       .attr('transform', 'rotate(45)')
       .attr('text-anchor', 'start')
-      .attr('x', 8);
+      .attr('x', 8)
+      .call(textUtils.axisShrinkFitText, margin.bottom);
     this.axisRight
       .attr('transform', `translate(${width}, 0)`)
       .call(axisRight);
     this.axisLeft
-      .call(axisLeft);
+      .call(axisLeft)
+      .selectAll('text')
+      .call(textUtils.axisShrinkFitText, margin.left);
 
     d3.select(this.container).select('svg')
       .attr('width', width + margin.left + margin.right)
