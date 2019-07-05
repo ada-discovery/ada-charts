@@ -1,23 +1,22 @@
 .ac-box-line {
-    stroke: #888;
-    stroke-width: 1px;
+    stroke-width: 2px;
     shape-rendering: crispedges;
+    pointer-events: none;
 }
 
 .ac-box-median {
-    stroke: #888;
+    stroke: #fff;
     stroke-width: 2px;
     shape-rendering: crispedges;
+    pointer-events: none;
 }
 
 .ac-box-upper-whisker {
-    stroke: #888;
     stroke-width: 1px;
     shape-rendering: crispedges;
 }
 
 .ac-box-lower-whisker {
-    stroke: #888;
     stroke-width: 1px;
     shape-rendering: crispedges;
 }
@@ -26,6 +25,7 @@
     fill: rgb(124, 191, 255);
     stroke: none;
     shape-rendering: crispedges;
+    cursor: pointer;
 }
 
 .ac-box-axis path {
@@ -43,4 +43,17 @@
 
 .ac-box-axis .tick text {
     font-size: 1.5em;
+}
+
+.ac-box-caption {
+    font-size: 1.25em;
+}
+
+.ac-box-label {
+    font-size: 1em;
+}
+
+.ac-box-value {
+    font-size: 0.6em;
+    pointer-events: none;
 }
