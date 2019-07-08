@@ -12,18 +12,16 @@
 }
 
 .ac-box-upper-whisker {
-    stroke-width: 1px;
+    stroke-width: 2px;
     shape-rendering: crispedges;
 }
 
 .ac-box-lower-whisker {
-    stroke-width: 1px;
+    stroke-width: 2px;
     shape-rendering: crispedges;
 }
 
 .ac-box-box {
-    fill: rgb(124, 191, 255);
-    stroke: none;
     shape-rendering: crispedges;
     cursor: pointer;
 }

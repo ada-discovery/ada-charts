@@ -206,57 +206,63 @@ export default class extends Chart {
     line.exit()
       .remove();
 
-    // const upperWhisker = this.svg.selectAll('.ac-box-upper-whisker')
-    //   .data(data);
-    //
-    // upperWhisker.enter()
-    //   .append('line')
-    //   .attr('class', 'ac-box-upper-whisker')
-    //   .attr('x1', d => x(d.group) + x.bandwidth() / 3)
-    //   .attr('y1', d => y(d.median))
-    //   .attr('x2', d => x(d.group) + x.bandwidth() - x.bandwidth() / 3)
-    //   .attr('y2', d => y(d.median))
-    //   .transition()
-    //   .duration(500)
-    //   .attr('y1', d => y(d.upperWhisker))
-    //   .attr('y2', d => y(d.upperWhisker));
-    //
-    // upperWhisker
-    //   .transition()
-    //   .duration(500)
-    //   .attr('x1', d => x(d.group) + x.bandwidth() / 3)
-    //   .attr('y1', d => y(d.upperWhisker))
-    //   .attr('x2', d => x(d.group) + x.bandwidth() - x.bandwidth() / 3)
-    //   .attr('y2', d => y(d.upperWhisker));
-    //
-    // upperWhisker.exit()
-    //   .remove();
-    //
-    // const lowerWhisker = this.svg.selectAll('.ac-box-lower-whisker')
-    //   .data(data);
-    //
-    // lowerWhisker.enter()
-    //   .append('line')
-    //   .attr('class', 'ac-box-lower-whisker')
-    //   .attr('x1', d => x(d.group) + x.bandwidth() / 3)
-    //   .attr('y1', d => y(d.median))
-    //   .attr('x2', d => x(d.group) + x.bandwidth() - x.bandwidth() / 3)
-    //   .attr('y2', d => y(d.median))
-    //   .transition()
-    //   .duration(500)
-    //   .attr('y1', d => y(d.lowerWhisker))
-    //   .attr('y2', d => y(d.lowerWhisker));
-    //
-    // lowerWhisker
-    //   .transition()
-    //   .duration(500)
-    //   .attr('x1', d => x(d.group) + x.bandwidth() / 3)
-    //   .attr('y1', d => y(d.lowerWhisker))
-    //   .attr('x2', d => x(d.group) + x.bandwidth() - x.bandwidth() / 3)
-    //   .attr('y2', d => y(d.lowerWhisker));
-    //
-    // lowerWhisker.exit()
-    //   .remove();
+
+    const upperWhisker = this.svg.selectAll('.ac-box-upper-whisker')
+      .data(data);
+
+    upperWhisker.enter()
+      .append('line')
+      .attr('class', 'ac-box-upper-whisker')
+      .attr('stroke', d => color(d.group))
+      .attr('x1', d => x(d.group) + x.bandwidth() / 3)
+      .attr('y1', d => y(d.median))
+      .attr('x2', d => x(d.group) + x.bandwidth() - x.bandwidth() / 3)
+      .attr('y2', d => y(d.median))
+      .transition()
+      .duration(500)
+      .attr('y1', d => y(d.upperWhisker))
+      .attr('y2', d => y(d.upperWhisker));
+
+    upperWhisker
+      .transition()
+      .duration(500)
+      .attr('stroke', d => color(d.group))
+      .attr('x1', d => x(d.group) + x.bandwidth() / 3)
+      .attr('y1', d => y(d.upperWhisker))
+      .attr('x2', d => x(d.group) + x.bandwidth() - x.bandwidth() / 3)
+      .attr('y2', d => y(d.upperWhisker));
+
+    upperWhisker.exit()
+      .remove();
+
+    const lowerWhisker = this.svg.selectAll('.ac-box-lower-whisker')
+      .data(data);
+
+    lowerWhisker.enter()
+      .append('line')
+      .attr('class', 'ac-box-lower-whisker')
+      .attr('stroke', d => color(d.group))
+      .attr('x1', d => x(d.group) + x.bandwidth() / 3)
+      .attr('y1', d => y(d.median))
+      .attr('x2', d => x(d.group) + x.bandwidth() - x.bandwidth() / 3)
+      .attr('y2', d => y(d.median))
+      .transition()
+      .duration(500)
+      .attr('y1', d => y(d.lowerWhisker))
+      .attr('y2', d => y(d.lowerWhisker));
+
+    lowerWhisker
+      .transition()
+      .duration(500)
+      .attr('stroke', d => color(d.group))
+      .attr('x1', d => x(d.group) + x.bandwidth() / 3)
+      .attr('y1', d => y(d.lowerWhisker))
+      .attr('x2', d => x(d.group) + x.bandwidth() - x.bandwidth() / 3)
+      .attr('y2', d => y(d.lowerWhisker));
+
+    lowerWhisker.exit()
+      .remove();
+
 
     const median = this.svg.selectAll('.ac-box-median')
       .data(data);
