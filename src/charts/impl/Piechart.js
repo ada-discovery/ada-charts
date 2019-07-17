@@ -23,7 +23,8 @@ export default class extends Chart {
   }
 
   render({
-    title,
+    caption,
+    clickCallback,
     values
   }) {
     const margin = {
@@ -44,6 +45,6 @@ export default class extends Chart {
 
     this.title
       .attr('transform', `translate(${width / 2}, ${-margin.top / 2})`)
-      .text(title);
+      .text(caption);
   }
 }

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Piechart</title>
+    <script src="http://localhost:8080/ada-charts.js"></script>
+</head>
+<body>
+<div id="piechart-controls">
+    <span>API examples:</span>
+    <button onclick="update()">update()</button>
+    <button onclick="toPNG()">toPNG()</button>
+    <button onclick="toSVG()">toSVG()</button>
+</div>
+<div id="piechart-container"></div>
+</body>
+</html>
+
+<script>
+  const container = document.querySelector('#piechart-container');
+  const piechart = AdaCharts.chart({ chartType: 'piechart', container });
+
+  function toPNG() {
+    piechart.toPNG();
+  }
+
+  function toSVG() {
+    piechart.toSVG();
+  }
+
+  function randomPieces() {
+    const num = Math.floor(Math.random() * (15 - 4 + 1) + 4);
+    const pieces = [];
+    for (let i = 0; i < num; i++) {
+      pieces.push({
+        group: 'Group: ' + i,
+        value: Math.floor(Math.random() * 100)
+      });
+    }
+    return pieces;
+  }
+
+  function update() {
+    piechart.update({
+      caption: 'Random Piechart',
+      clickCallback: d => console.log(d),
+      values: randomPieces()
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', update, false);
+</script>
+
+<style>
+    body {
+        display: flex;
+        flex-direction: row;
+    }
+
+    #piechart-controls {
+        display: flex;
+        flex-direction: column;
+    }
+
+    #piechart-container {
+        width: 50vw;
+    }
+</style>
