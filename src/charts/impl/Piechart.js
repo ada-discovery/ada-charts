@@ -11,11 +11,11 @@ export default class extends Chart {
       .attr('class', 'ac-pie-svg ada-chart')
       .append('g');
 
-    this.title = this.svg
+    this.caption = this.svg
       .append('text')
       .attr('text-anchor', 'middle')
       .style('dominant-baseline', 'central')
-      .attr('class', 'ac-pie-title');
+      .attr('class', 'ac-pie-caption');
   }
 
   static get name() {
@@ -25,17 +25,27 @@ export default class extends Chart {
   render({
     caption,
     clickCallback,
-    values
+    values,
   }) {
     const margin = {
-      top: this.containerWidth / 12,
-      right: this.containerWidth / 5,
-      bottom: this.containerWidth / 15,
-      left: this.containerWidth / 12,
+      top: this.containerWidth / 20,
+      right: this.containerWidth / 20,
+      bottom: this.containerWidth / 20,
+      left: this.containerWidth / 20,
     };
 
     const width = this.containerWidth - margin.left - margin.right;
     const height = this.containerWidth - margin.top - margin.bottom;
+
+    const color = d3.scaleOrdinal()
+      .domain(values.map(d => d.group))
+      .range(d3.schemeSet3);
+
+    const data = d3.pie()
+      .value(d => d.value)
+      .sort((a, b) => d3.ascending(a.value, b.value))(values);
+
+    const radius = Math.min(width / 2, height / 2);
 
     d3.select(this.container).select('svg')
       .attr('width', width + margin.left + margin.right)
@@ -43,8 +53,22 @@ export default class extends Chart {
 
     this.svg.attr('transform', `translate(${margin.left}, ${margin.top})`);
 
-    this.title
+    this.caption
       .attr('transform', `translate(${width / 2}, ${-margin.top / 2})`)
       .text(caption);
+
+    const slice = this.svg.selectAll('.ac-pie-slice')
+      .data(data);
+
+    slice.enter()
+      .append('path')
+      .attr('class', 'ac-pie-slice')
+      .attr('transform', `translate(${width / 2}, ${height / 2})`)
+      .attr('d', d3.arc().innerRadius(0).outerRadius(radius))
+      .attr('fill', d => color(d.value))
+      .on('click', clickCallback);
+
+    slice.exit()
+      .remove();
   }
 }
