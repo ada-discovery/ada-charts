@@ -16,11 +16,11 @@ export default class extends Chart {
       .attr('class', 'ac-bar-svg ada-chart')
       .append('g');
 
-    this.title = this.svg
+    this.caption = this.svg
       .append('text')
       .attr('text-anchor', 'middle')
       .style('dominant-baseline', 'central')
-      .attr('class', 'ac-bar-title');
+      .attr('class', 'ac-bar-caption');
 
     this.axisBottom = this.svg
       .append('g')
@@ -56,7 +56,7 @@ export default class extends Chart {
   }
 
   render({
-    title,
+    caption,
     values,
     dataType,
     xAxisLabel,
@@ -102,9 +102,9 @@ export default class extends Chart {
 
     this.svg.attr('transform', `translate(${margin.left}, ${margin.top})`);
 
-    this.title
+    this.caption
       .attr('transform', `translate(${width / 2}, ${-margin.top / 2})`)
-      .text(title);
+      .text(caption);
 
     this.labelLeft
       .attr('transform', `translate(${-margin.left * 0.8}, ${height / 2})rotate(-90)`)
