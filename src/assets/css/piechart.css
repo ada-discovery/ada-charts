@@ -1,0 +1,9 @@
+.ac-pie-caption {
+    fill: #797979;
+}
+
+.ac-pie-slice {
+    cursor: pointer;
+    stroke: #fff;
+    stroke-width: 2px;
+}
