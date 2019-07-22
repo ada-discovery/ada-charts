@@ -4,6 +4,10 @@
 
 .ac-pie-slice {
     cursor: pointer;
-    stroke: #fff;
+    stroke: #444;
     stroke-width: 2px;
+}
+
+.ac-pie-slice:hover {
+    opacity: 0.6;
 }

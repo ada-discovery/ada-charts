@@ -27,6 +27,12 @@ export default class extends Chart {
     clickCallback,
     values,
   }) {
+    const data = values.reduce((acc, d, i) => acc.concat(d.map(e => ({
+      group: e.group,
+      circleIdx: i,
+      value: e.value,
+    })), []));
+
     const margin = {
       top: this.containerWidth / 20,
       right: this.containerWidth / 20,
@@ -37,15 +43,11 @@ export default class extends Chart {
     const width = this.containerWidth - margin.left - margin.right;
     const height = this.containerWidth - margin.top - margin.bottom;
 
+    const groups = [...new Set(data.map(d => d.group))];
+
     const color = d3.scaleOrdinal()
-      .domain(values.map(d => d.group))
+      .domain(groups)
       .range(d3.schemeSet3);
-
-    const data = d3.pie()
-      .value(d => d.value)
-      .sort((a, b) => d3.ascending(a.value, b.value))(values);
-
-    const radius = Math.min(width / 2, height / 2);
 
     d3.select(this.container).select('svg')
       .attr('width', width + margin.left + margin.right)
@@ -57,18 +59,31 @@ export default class extends Chart {
       .attr('transform', `translate(${width / 2}, ${-margin.top / 2})`)
       .text(caption);
 
-    const slice = this.svg.selectAll('.ac-pie-slice')
-      .data(data);
+    const circleDepth = values.length;
+    const maxRadius = Math.min(width / 2, height / 2);
+    for (let circleIdx = 0; circleIdx < circleDepth; circleIdx += 1) {
+      const circleData = data.filter(d => d.circleIdx === circleIdx);
+      const circleThickness = maxRadius / circleDepth;
+      const outerRadius = maxRadius - circleIdx * circleThickness;
+      const innerRadius = outerRadius - circleThickness;
 
-    slice.enter()
-      .append('path')
-      .attr('class', 'ac-pie-slice')
-      .attr('transform', `translate(${width / 2}, ${height / 2})`)
-      .attr('d', d3.arc().innerRadius(0).outerRadius(radius))
-      .attr('fill', d => color(d.value))
-      .on('click', clickCallback);
+      const pie = d3.pie()
+        .value(d => d.value)
+        .sort((a, b) => d3.ascending(a.value, b.value))(circleData);
 
-    slice.exit()
-      .remove();
+      const slice = this.svg.selectAll(`.ac-pie-slice .circle-idx-${circleIdx}`)
+        .data(pie);
+
+      slice.enter()
+        .append('path')
+        .attr('class', `ac-pie-slice circle-idx-${circleIdx}`)
+        .attr('transform', `translate(${width / 2}, ${height / 2})`)
+        .attr('d', d3.arc().innerRadius(innerRadius).outerRadius(outerRadius))
+        .attr('fill', d => color(d.data.group))
+        .on('click', d => clickCallback(d.data));
+
+      slice.exit()
+        .remove();
+    }
   }
 }

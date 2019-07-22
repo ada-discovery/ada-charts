@@ -28,7 +28,7 @@
     piechart.toSVG();
   }
 
-  function randomPieces() {
+  function generateCircle() {
     const num = Math.floor(Math.random() * (15 - 4 + 1) + 4);
     const pieces = [];
     for (let i = 0; i < num; i++) {
@@ -40,11 +40,20 @@
     return pieces;
   }
 
+  function generateValues() {
+    const num = Math.floor(Math.random() * 5 + 1);
+    const values = [];
+    for (let i = 0; i < num; i++) {
+      values.push(generateCircle());
+    }
+    return values;
+  }
+
   function update() {
     piechart.update({
       caption: 'Random Piechart',
       clickCallback: d => console.log(d),
-      values: randomPieces()
+      values: generateValues()
     });
   }
 
