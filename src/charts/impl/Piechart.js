@@ -55,6 +55,7 @@ export default class extends Chart {
 
     const circleDepth = values.length;
     const maxRadius = Math.min(width / 2, height / 2);
+    this.svg.selectAll('.ac-pie-slice').remove();
     for (let circleIdx = 0; circleIdx < circleDepth; circleIdx += 1) {
       const circleData = values[circleIdx];
       const circleThickness = maxRadius / circleDepth;
@@ -63,21 +64,19 @@ export default class extends Chart {
 
       const pie = d3.pie()
         .value(d => d.value)
-        .sort((a, b) => d3.ascending(a.value, b.value))(circleData);
+        .sort(() => {})(circleData);
 
-      const slice = this.svg.selectAll(`.ac-pie-slice .circle-idx-${circleIdx}`)
-        .data(pie);
+      const slice = this.svg.selectAll(`.ac-pie-slice.circle-idx-${circleIdx}`)
+        .data(pie, () => `${circleDepth}:${circleData.group}`);
 
       slice.enter()
         .append('path')
+        .merge(slice)
         .attr('class', `ac-pie-slice circle-idx-${circleIdx}`)
         .attr('transform', `translate(${width / 2}, ${height / 2})`)
         .attr('d', d3.arc().innerRadius(innerRadius).outerRadius(outerRadius))
         .attr('fill', d => color(d.data.group))
         .on('click', d => clickCallback(d.data));
-
-      slice.exit()
-        .remove();
     }
   }
 }
