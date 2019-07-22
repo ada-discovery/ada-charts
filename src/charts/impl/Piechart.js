@@ -27,12 +27,6 @@ export default class extends Chart {
     clickCallback,
     values,
   }) {
-    const data = values.reduce((acc, d, i) => acc.concat(d.map(e => ({
-      group: e.group,
-      circleIdx: i,
-      value: e.value,
-    })), []));
-
     const margin = {
       top: this.containerWidth / 20,
       right: this.containerWidth / 20,
@@ -43,7 +37,7 @@ export default class extends Chart {
     const width = this.containerWidth - margin.left - margin.right;
     const height = this.containerWidth - margin.top - margin.bottom;
 
-    const groups = [...new Set(data.map(d => d.group))];
+    const groups = [...new Set(values.reduce((acc, cur) => acc.concat(cur.map(d => d.group)), []))];
 
     const color = d3.scaleOrdinal()
       .domain(groups)
@@ -62,7 +56,7 @@ export default class extends Chart {
     const circleDepth = values.length;
     const maxRadius = Math.min(width / 2, height / 2);
     for (let circleIdx = 0; circleIdx < circleDepth; circleIdx += 1) {
-      const circleData = data.filter(d => d.circleIdx === circleIdx);
+      const circleData = values[circleIdx];
       const circleThickness = maxRadius / circleDepth;
       const outerRadius = maxRadius - circleIdx * circleThickness;
       const innerRadius = outerRadius - circleThickness;
