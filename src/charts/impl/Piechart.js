@@ -71,17 +71,34 @@ export default class extends Chart {
         .value(d => d.value)
         .sort(() => {})(circleData);
 
+      const arc = d3.arc()
+        .innerRadius(innerRadius)
+        .outerRadius(outerRadius);
+
       const slice = this.svg.selectAll(`.ac-pie-slice.ac-pie-circle-idx-${circleIdx}`)
         .data(pie, d => `${circleNum}:${d.data.group}`);
 
-      slice.enter()
-        .append('path')
-        .merge(slice)
+      const sliceEnter = slice.enter()
+        .append('g')
         .attr('class', `ac-pie-slice ac-pie-circle-idx-${circleIdx}`)
-        .attr('transform', `translate(${width / 2}, ${height / 2})`)
-        .attr('d', d3.arc().innerRadius(innerRadius).outerRadius(outerRadius))
-        .attr('fill', d => color(d.data.group))
         .on('click', d => clickCallback(d.data));
+
+      sliceEnter
+        .append('path')
+        .attr('class', `ac-pie-slice-path ac-pie-circle-idx-${circleIdx}`)
+        .attr('transform', `translate(${width / 2}, ${height / 2})`)
+        .attr('d', arc)
+        .attr('fill', d => color(d.data.group));
+
+      sliceEnter
+        .append('text')
+        .attr('class', `ac-pie-slice-text ac-pie-circle-idx-${circleIdx}`)
+        .attr('x', width / 2)
+        .attr('y', height / 2)
+        .attr('transform', d => `translate(${arc.centroid(d)})`)
+        .style('text-anchor', 'middle')
+        .style('dominant-baseline', 'central')
+        .text(d => d.data.value);
 
       const legendX = d3.scaleBand()
         .domain(circleGroups)
@@ -105,12 +122,12 @@ export default class extends Chart {
         .attr('fill', color)
         .text(d => d)
         .on('mouseenter', (d) => {
-          this.svg.selectAll(`.ac-pie-slice.ac-pie-circle-idx-${circleIdx}`)
+          this.svg.selectAll(`.ac-pie-slice-path.ac-pie-circle-idx-${circleIdx}`)
             .filter(e => e.data.group === d)
             .style('fill', '#f00');
         })
         .on('mouseleave', () => {
-          this.svg.selectAll('.ac-pie-slice')
+          this.svg.selectAll('.ac-pie-slice-path')
             .style('fill', e => color(e.data.group));
         })
         .each((_, i, arr) => textUtils.sliceFitText(arr[i], legendX.bandwidth()));
