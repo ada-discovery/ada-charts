@@ -39,9 +39,11 @@ export default class extends Chart {
 
     const groups = [...new Set(values.reduce((acc, cur) => acc.concat(cur.map(d => d.group)), []))];
 
+    const customSchemeSet3 = d3.schemeSet3;
+    customSchemeSet3.splice(1, 1);
     const color = d3.scaleOrdinal()
       .domain(groups)
-      .range(d3.schemeSet3);
+      .range(customSchemeSet3);
 
     d3.select(this.container).select('svg')
       .attr('width', width + margin.left + margin.right)
