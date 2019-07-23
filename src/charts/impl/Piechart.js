@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import Chart from '../Chart';
 import '../../assets/css/piechart.css';
+import textUtils from '../../utils/textwrappers';
 
 export default class extends Chart {
   constructor({ container }) {
@@ -39,7 +40,7 @@ export default class extends Chart {
 
     const groups = [...new Set(values.reduce((acc, cur) => acc.concat(cur.map(d => d.group)), []))];
 
-    const customSchemeSet3 = d3.schemeSet3;
+    const customSchemeSet3 = d3.schemeSet3.slice();
     customSchemeSet3.splice(1, 1);
     const color = d3.scaleOrdinal()
       .domain(groups)
@@ -82,15 +83,14 @@ export default class extends Chart {
         .attr('fill', d => color(d.data.group))
         .on('click', d => clickCallback(d.data));
 
-      const legendX = d3.scalePoint()
+      const legendX = d3.scaleBand()
         .domain(circleGroups)
-        .range([0, width])
-        .padding(0.1);
+        .range([0, width]);
 
-      const legendY = d3.scalePoint()
+      const legendY = d3.scaleBand()
         .domain([...Array(circleNum).keys()])
         .range([height + margin.bottom, height])
-        .padding(0.3);
+        .paddingOuter(0.7);
 
       const legendElement = this.svg.selectAll(`.ac-pie-legend-element.ac-pie-circle-idx-${circleIdx}`)
         .data(circleGroups, d => d);
@@ -100,7 +100,7 @@ export default class extends Chart {
         .attr('class', `ac-pie-legend-element ac-pie-circle-idx-${circleIdx}`)
         .attr('x', d => legendX(d))
         .attr('y', legendY(circleIdx))
-        .style('text-anchor', 'middle')
+        .style('text-anchor', 'start')
         .style('dominant-baseline', 'central')
         .attr('fill', color)
         .text(d => d)
@@ -112,7 +112,8 @@ export default class extends Chart {
         .on('mouseleave', () => {
           this.svg.selectAll('.ac-pie-slice')
             .style('fill', e => color(e.data.group));
-        });
+        })
+        .each((_, i, arr) => textUtils.sliceFitText(arr[i], legendX.bandwidth()));
     }
   }
 }
