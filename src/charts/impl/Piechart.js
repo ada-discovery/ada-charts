@@ -65,7 +65,7 @@ export default class extends Chart {
       const circleGroups = circleData.map(d => d.group);
       const circleThickness = maxRadius / circleNum;
       const outerRadius = maxRadius - circleIdx * circleThickness;
-      const innerRadius = outerRadius - circleThickness;
+      const innerRadius = outerRadius - circleThickness + 3;
 
       const pie = d3.pie()
         .value(d => d.value)
