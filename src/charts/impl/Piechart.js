@@ -103,7 +103,7 @@ export default class extends Chart {
         .attr('fill', color)
         .text(d => d)
         .on('mouseenter', (d) => {
-          this.svg.selectAll('.ac-pie-slice')
+          this.svg.selectAll(`.ac-pie-slice.ac-pie-circle-idx-${circleIdx}`)
             .filter(e => e.data.group === d)
             .style('fill', '#f00');
         })
