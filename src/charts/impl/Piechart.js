@@ -30,7 +30,7 @@ export default class extends Chart {
     const margin = {
       top: this.containerWidth / 20,
       right: this.containerWidth / 20,
-      bottom: this.containerWidth / 20,
+      bottom: this.containerWidth / 8,
       left: this.containerWidth / 20,
     };
 
@@ -53,12 +53,14 @@ export default class extends Chart {
       .attr('transform', `translate(${width / 2}, ${-margin.top / 2})`)
       .text(caption);
 
-    const circleDepth = values.length;
+    const circleNum = values.length;
     const maxRadius = Math.min(width / 2, height / 2);
     this.svg.selectAll('.ac-pie-slice').remove();
-    for (let circleIdx = 0; circleIdx < circleDepth; circleIdx += 1) {
+    this.svg.selectAll('.ac-pie-legend-element').remove();
+    for (let circleIdx = 0; circleIdx < circleNum; circleIdx += 1) {
       const circleData = values[circleIdx];
-      const circleThickness = maxRadius / circleDepth;
+      const circleGroups = circleData.map(d => d.group);
+      const circleThickness = maxRadius / circleNum;
       const outerRadius = maxRadius - circleIdx * circleThickness;
       const innerRadius = outerRadius - circleThickness;
 
@@ -66,17 +68,49 @@ export default class extends Chart {
         .value(d => d.value)
         .sort(() => {})(circleData);
 
-      const slice = this.svg.selectAll(`.ac-pie-slice.circle-idx-${circleIdx}`)
-        .data(pie, () => `${circleDepth}:${circleData.group}`);
+      const slice = this.svg.selectAll(`.ac-pie-slice.ac-pie-circle-idx-${circleIdx}`)
+        .data(pie, d => `${circleNum}:${d.data.group}`);
 
       slice.enter()
         .append('path')
         .merge(slice)
-        .attr('class', `ac-pie-slice circle-idx-${circleIdx}`)
+        .attr('class', `ac-pie-slice ac-pie-circle-idx-${circleIdx}`)
         .attr('transform', `translate(${width / 2}, ${height / 2})`)
         .attr('d', d3.arc().innerRadius(innerRadius).outerRadius(outerRadius))
         .attr('fill', d => color(d.data.group))
         .on('click', d => clickCallback(d.data));
+
+      const legendX = d3.scalePoint()
+        .domain(circleGroups)
+        .range([0, width])
+        .padding(0.1);
+
+      const legendY = d3.scalePoint()
+        .domain([...Array(circleNum).keys()])
+        .range([height + margin.bottom, height])
+        .padding(0.3);
+
+      const legendElement = this.svg.selectAll(`.ac-pie-legend-element.ac-pie-circle-idx-${circleIdx}`)
+        .data(circleGroups, d => d);
+
+      legendElement.enter()
+        .append('text')
+        .attr('class', `ac-pie-legend-element ac-pie-circle-idx-${circleIdx}`)
+        .attr('x', d => legendX(d))
+        .attr('y', legendY(circleIdx))
+        .style('text-anchor', 'middle')
+        .style('dominant-baseline', 'central')
+        .attr('fill', color)
+        .text(d => d)
+        .on('mouseenter', (d) => {
+          this.svg.selectAll('.ac-pie-slice')
+            .filter(e => e.data.group === d)
+            .style('fill', '#f00');
+        })
+        .on('mouseleave', () => {
+          this.svg.selectAll('.ac-pie-slice')
+            .style('fill', e => color(e.data.group));
+        });
     }
   }
 }

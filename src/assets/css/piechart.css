@@ -1,13 +1,18 @@
 .ac-pie-caption {
-    fill: #797979;
+    font-size: 1.5em;
+    fill: #666;
 }
 
 .ac-pie-slice {
     cursor: pointer;
-    stroke: #444;
+    stroke: #666;
     stroke-width: 2px;
 }
 
 .ac-pie-slice:hover {
     opacity: 0.6;
+}
+
+.ac-pie-legend-element {
+    font-size: 0.75em;
 }
