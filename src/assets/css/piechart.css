@@ -5,8 +5,8 @@
 
 .ac-pie-slice {
     cursor: pointer;
-    stroke: #666;
-    stroke-width: 2px;
+    stroke: #fff;
+    stroke-width: 0.5px;
 }
 
 .ac-pie-slice:hover {
@@ -15,4 +15,9 @@
 
 .ac-pie-legend-element {
     font-size: 0.75em;
+    cursor: pointer;
+}
+
+.ac-pie-legend-element:hover {
+    opacity: 0.6;
 }
