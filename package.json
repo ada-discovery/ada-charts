@@ -9,7 +9,7 @@
     "devserver": "webpack-dev-server --mode development"
   },
   "dependencies": {
-    "d3": "5.7.0",
+    "d3": "7.6.1",
     "html2canvas": "1.0.0-alpha.12"
   },
   "devDependencies": {
